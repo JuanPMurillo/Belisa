@@ -1,29 +1,57 @@
-Belisa - Punto de Venta
 
-Belisa es un sistema de punto de venta diseñado para gestionar compras, proveedores y productos almacenados. Este proyecto fue desarrollado con C# y SQL Server, orientado a pequeñas y medianas empresas que buscan optimizar sus operaciones.
+Sistema de Punto de Venta para Belisa
 
-Características principales
+Este proyecto es un Sistema de Punto de Venta (POS) desarrollado en C# con integración de bases de datos en SQL Server, diseñado específicamente para las operaciones de la empresa Belisa, dedicada al negocio de depilación. El sistema tiene como objetivo optimizar la gestión de compras, proveedores, inventarios y productos almacenados, ofreciendo una solución eficiente y personalizada para las necesidades del negocio.
 
-Gestión de productos y proveedores.
+Características Principales
 
-Registro y control de compras.
+Gestión de Inventario: Registro y seguimiento de productos almacenados con detalles como cantidades y precios.
 
-Base de datos integrada para manejo eficiente.
+Control de Proveedores: Registro y administración de datos de los proveedores, facilitando la organización de compras.
 
+Gestión de Ventas: Registro de transacciones y generación de reportes.
 
-Tecnologías utilizadas
+Interfaz Amigable: Diseño intuitivo basado en Windows Forms para un uso accesible y práctico.
 
-C# (Windows Forms).
-
-SQL Server (base de datos).
+Seguridad de Datos: Conexión segura y estructurada con SQL Server.
 
 
-Uso
+Tecnologías Utilizadas
 
-1. Clona este repositorio.
+Lenguaje: C#
+
+Base de Datos: SQL Server
+
+Framework: Windows Forms
 
 
-2. Configura la base de datos en tu entorno local.
+Instalación y Configuración
+
+1. Clona este repositorio en tu máquina local:
+
+git clone https://github.com/JuanPMurillo/Belisa.git
 
 
-3. Ejecuta la aplicación.
+2. Configura la conexión a la base de datos en el archivo App.config.
+
+
+3. Carga la base de datos proporcionada en SQL Server.
+
+
+4. Compila y ejecuta el proyecto desde Visual Studio.
+
+
+
+Próximos Pasos
+
+Implementación de reportes personalizados.
+
+Integración de módulos adicionales como control de clientes y generación de facturas electrónicas.
+
+Optimización de la interfaz para dispositivos táctiles.
+
+
+Contribución
+
+Si deseas colaborar en este proyecto o proporcionar retroalimentación, por favor, crea un issue o envía un pull request.
+
