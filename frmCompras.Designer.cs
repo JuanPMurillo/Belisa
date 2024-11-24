@@ -174,7 +174,6 @@
             this.txtidproveedor.Name = "txtidproveedor";
             this.txtidproveedor.Size = new System.Drawing.Size(23, 20);
             this.txtidproveedor.TabIndex = 27;
-            this.txtidproveedor.Visible = false;
             // 
             // btnsearchproveedor
             // 
@@ -463,6 +462,7 @@
             this.btnregistrar.Text = "Registrar";
             this.btnregistrar.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnregistrar.UseVisualStyleBackColor = false;
+            this.btnregistrar.Click += new System.EventHandler(this.btnregistrar_Click);
             // 
             // btnagregarproducto
             // 

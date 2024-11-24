@@ -2,6 +2,7 @@
 using BELISA_POV.Utilidades;
 using BelisaEntidad;
 using BelisaNegocio;
+using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
@@ -279,6 +280,66 @@ namespace BELISA_POV
             else
             {
                 e.Handled = true;  // Bloquear cualquier otro carácter
+            }
+        }
+
+        private void btnregistrar_Click(object sender, EventArgs e)
+        {
+            if (Convert.ToInt32(txtidproveedor.Text) == 0)
+            {
+                MessageBox.Show("Debe Seleccionar Un Proveedor", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            if (dgvdata.Rows.Count < 1)
+            {
+                MessageBox.Show("Debe Ingresar Productos En La Compra", "Mensaje", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            DataTable detalle_compra = new DataTable();
+            detalle_compra.Columns.Add("IdProdducto", typeof(int));
+            detalle_compra.Columns.Add("PrecioCompra", typeof(decimal));
+            detalle_compra.Columns.Add("PrecioVenta", typeof(decimal));
+            detalle_compra.Columns.Add("Cantidad", typeof(int));
+            detalle_compra.Columns.Add("MontoTotal", typeof(decimal));
+            foreach (DataGridViewRow row in dgvdata.Rows) 
+            {
+                detalle_compra.Rows.Add(
+                    new object[]
+                    {
+                        Convert.ToInt32(row.Cells["IdProducto"].Value.ToString()),
+                        row.Cells["PrecioCompra"].Value.ToString(),
+                        row.Cells["PrecioVenta"].Value.ToString(),
+                        row.Cells["Cantidad"].Value.ToString(),
+                        row.Cells["SubTotal"].Value.ToString()
+                    }); 
+            }
+            int idcorrelativo = new BN_Compra().ObtenerCorrelativo();
+            string numdoc = string.Format("{0:0000000}", idcorrelativo);
+            Compra oCompra = new Compra()
+            {
+                oUsuario = new Usuario() { idUsuario = _Usuario.idUsuario },
+                oProveedor = new Proveedor() { IdProveedor = Convert.ToInt32(txtidproveedor.Text) },
+                TipoDocumento = ((OpcionCombo)cbotipodocumento.SelectedItem).Texto,
+                NumeroDocumento = numdoc,
+                MontoTotal = Convert.ToDecimal(txttotal.Text)
+            };
+            string mensaje = string.Empty;
+            bool respuesta = new BN_Compra().Registrar(oCompra,detalle_compra,out mensaje);
+            if (respuesta)
+            {
+                var result = MessageBox.Show("Numero de Compra Generada:\n" + numdoc + "\n\n¿Desea Copiar el Numero?","Mensaje",
+                    MessageBoxButtons.YesNo,MessageBoxIcon.Information);
+                if (result == DialogResult.Yes) { Clipboard.SetText(numdoc);
+                txtidproveedor.Text = "0";
+                txtdocumentoproveedor.Text = "";
+                txtrazonsocial.Text = "";
+                dgvdata.Rows.Clear();
+                calcularTotal();
+                }
+                else
+                {
+                    MessageBox.Show(mensaje,"Mensaje",MessageBoxButtons.OK,MessageBoxIcon.Exclamation);
+                }
             }
         }
     }
