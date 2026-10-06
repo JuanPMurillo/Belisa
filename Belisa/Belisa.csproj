@@ -47,6 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Estilo.cs" />
+    <Compile Include="FrmCategoria.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPendiente.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FrmPrimerAdmin.cs">
       <SubType>Form</SubType>
     </Compile>
