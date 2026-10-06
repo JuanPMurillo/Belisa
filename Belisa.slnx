@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Belisa/Belisa.csproj" />
+  <Project Path="BelisaDatos/BelisaDatos.csproj" />
+  <Project Path="BelisaEntidad/BelisaEntidad.csproj" />
+  <Project Path="BelisaNegocio/BelisaNegocio.csproj" />
+</Solution>
