@@ -83,6 +83,7 @@ namespace Belisa
             txtBuscar = Estilo.Campo(70, 12, 300);
             txtBuscar.TextChanged += (s, e) => Refrescar();
             barraBuscar.Controls.Add(txtBuscar);
+            barraBuscar.Controls.Add(Exportar.BotonExcel(grid, "Categorías"));
 
             panel.Controls.Add(grid);
             panel.Controls.Add(barraBuscar);

@@ -161,7 +161,7 @@ namespace Belisa
             menu.Controls.Add(botonInicio);
 
             AgregarItem("menuventas", "Ventas", new[] { "Registrar venta", "Ver detalle" },
-                new Func<Form>[] { () => new FrmPendiente("Registrar venta"), () => new FrmPendiente("Detalle de ventas") });
+                new Func<Form>[] { () => new FrmVenta(), () => new FrmDetalleVenta() });
 
             AgregarItem("menucompras", "Compras", new[] { "Registrar compra", "Ver detalle" },
                 new Func<Form>[] { () => new FrmCompra(), () => new FrmDetalleCompra() });

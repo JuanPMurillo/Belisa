@@ -93,10 +93,16 @@ namespace BelisaEntidad
     {
         public int IdVenta { get; set; }
         public int IdUsuario { get; set; }
-        public int? IdCliente { get; set; }          // null = venta de mostrador
+        public string UsuarioNombre { get; set; }
+        public int? IdCliente { get; set; }          // null = público en general
         public string ClienteNombre { get; set; }
         public string TipoDocumento { get; set; }
         public string NumeroDocumento { get; set; }
+        public string MetodoPago { get; set; }       // Efectivo, Tarjeta o Transferencia
+        public string ReferenciaPago { get; set; }   // por ejemplo, folio de Mercado Pago
+        public decimal Subtotal { get; set; }
+        public decimal DescuentoPorcentaje { get; set; }
+        public decimal MontoDescuento { get; set; }
         public decimal MontoPago { get; set; }
         public decimal MontoCambio { get; set; }
         public decimal MontoTotal { get; set; }

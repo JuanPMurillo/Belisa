@@ -14,12 +14,16 @@ namespace Belisa
     {
         private readonly CompraN negocio = new CompraN();
         private List<Compra> compras = new List<Compra>();
+        private Compra compraActual;
+        private List<DetalleCompra> detalleActual = new List<DetalleCompra>();
+        private DateTime desdeUsado = DateTime.Today, hastaUsado = DateTime.Today;
         private bool cargando;
 
         private DateTimePicker dtDesde, dtHasta;
         private TextBox txtFiltro;
         private Label lblResumen, lblTituloDetalle;
         private DataGridView gridCompras, gridDetalle;
+        private Button btnComprobante;
 
         public FrmDetalleCompra()
         {
@@ -58,7 +62,7 @@ namespace Belisa
 
         private void ConstruirDetalle(Panel padre)
         {
-            var abajo = new Panel { Dock = DockStyle.Bottom, Height = 280, Padding = new Padding(0, 12, 0, 0) };
+            var abajo = new Panel { Dock = DockStyle.Bottom, Height = 290, Padding = new Padding(0, 12, 0, 0) };
             var tarjeta = new Panel { Dock = DockStyle.Fill };
 
             gridDetalle = Tabla.Crear();
@@ -71,16 +75,25 @@ namespace Belisa
 
             lblTituloDetalle = new Label
             {
-                Dock = DockStyle.Top,
-                Height = 32,
+                Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = Estilo.Negrita,
                 ForeColor = Estilo.Texto,
                 Text = "Selecciona una compra para ver su detalle"
             };
 
-            tarjeta.Controls.Add(gridDetalle);        // Fill primero
-            tarjeta.Controls.Add(lblTituloDetalle);   // luego arriba
+            btnComprobante = Estilo.Boton("Comprobante PDF", 0, 2, 170, 34, false);
+            btnComprobante.Enabled = false;
+            btnComprobante.Click += (s, e) => Comprobante();
+            var panelBoton = new Panel { Dock = DockStyle.Right, Width = 178 };
+            panelBoton.Controls.Add(btnComprobante);
+
+            var cabecera = new Panel { Dock = DockStyle.Top, Height = 38 };
+            cabecera.Controls.Add(lblTituloDetalle);   // Fill primero
+            cabecera.Controls.Add(panelBoton);         // luego el botón a la derecha
+
+            tarjeta.Controls.Add(gridDetalle);   // Fill primero
+            tarjeta.Controls.Add(cabecera);      // luego arriba
             abajo.Controls.Add(tarjeta);
             padre.Controls.Add(abajo);
         }
@@ -98,6 +111,8 @@ namespace Belisa
                 ForeColor = Estilo.Texto
             };
             barra.Controls.Add(lblResumen);
+            barra.Controls.Add(Exportar.BotonExcel(gridCompras, "Compras"));
+            barra.Controls.Add(Exportar.BotonPdf(gridCompras, "Reporte de compras", SubtituloReporte));
 
             dtDesde = new DateTimePicker
             {
@@ -137,6 +152,10 @@ namespace Belisa
 
         private void Buscar()
         {
+            // Se recuerda el rango realmente buscado para ponerlo en el reporte
+            desdeUsado = dtDesde.Value.Date;
+            hastaUsado = dtHasta.Value.Date;
+
             try
             {
                 compras = negocio.Listar(dtDesde.Value, dtHasta.Value);
@@ -147,6 +166,17 @@ namespace Belisa
                 compras = new List<Compra>();
             }
             Refrescar();
+        }
+
+        private string SubtituloReporte()
+        {
+            DateTime a = desdeUsado <= hastaUsado ? desdeUsado : hastaUsado;
+            DateTime b = desdeUsado <= hastaUsado ? hastaUsado : desdeUsado;
+            string texto = "Del " + a.ToString("dd/MM/yyyy") + " al " + b.ToString("dd/MM/yyyy");
+
+            string filtro = txtFiltro.Text.Trim();
+            if (filtro.Length > 0) texto += "  ·  Filtro: " + filtro;
+            return texto;
         }
 
         private void Refrescar()
@@ -173,6 +203,9 @@ namespace Belisa
 
             gridCompras.ClearSelection();
             gridDetalle.Rows.Clear();
+            compraActual = null;
+            detalleActual = new List<DetalleCompra>();
+            btnComprobante.Enabled = false;
             lblTituloDetalle.Text = "Selecciona una compra para ver su detalle";
             cargando = false;
         }
@@ -190,6 +223,10 @@ namespace Belisa
                 return;
             }
 
+            compraActual = c;
+            detalleActual = detalle;
+            btnComprobante.Enabled = true;
+
             lblTituloDetalle.Text = "Detalle de " + c.NumeroDocumento + "  ·  " + c.ProveedorNombre;
 
             gridDetalle.Rows.Clear();
@@ -199,6 +236,16 @@ namespace Belisa
                                      d.PrecioCompra, d.PrecioVenta, d.MontoTotal);
             }
             gridDetalle.ClearSelection();
+        }
+
+        private void Comprobante()
+        {
+            if (compraActual == null) return;
+
+            var compra = compraActual;
+            var detalle = detalleActual;
+            Exportar.GuardarPdf("Compra_" + compra.NumeroDocumento,
+                ruta => ReportePdf.ComprobanteCompra(compra, detalle, ruta));
         }
     }
 }

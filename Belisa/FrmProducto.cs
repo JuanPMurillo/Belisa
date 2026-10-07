@@ -100,6 +100,7 @@ namespace Belisa
                 ForeColor = Estilo.Texto
             };
             barra.Controls.Add(lblResumen);
+            barra.Controls.Add(Exportar.BotonExcel(grid, "Productos"));
             barra.Controls.Add(Estilo.Etiqueta("Buscar", 0, 16));
 
             txtBuscar = Estilo.Campo(70, 12, 280);
