@@ -33,6 +33,9 @@ namespace Belisa
             Dato(s, "Fecha", c.FechaRegistro.ToString("dd/MM/yyyy HH:mm"));
             Dato(s, "Proveedor", c.ProveedorNombre);
             Dato(s, "Documento", c.TipoDocumento);
+            string pago = c.MetodoPago ?? "";
+            if (!string.IsNullOrEmpty(c.ReferenciaPago)) pago += "  (ref. " + c.ReferenciaPago + ")";
+            Dato(s, "Método de pago", pago);
             Dato(s, "Registró", c.UsuarioNombre);
             s.AddParagraph().Format.SpaceAfter = 4;
 

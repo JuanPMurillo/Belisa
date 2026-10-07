@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using BelisaEntidad;
@@ -7,6 +8,7 @@ using BelisaNegocio;
 
 namespace Belisa
 {
+    [DesignerCategory("Code")]
     public class Inicio : Form
     {
         private const int AnchoMenu = 240;
@@ -108,14 +110,21 @@ namespace Belisa
                 Text = usuario.NombreCompleto + "  ·  " + usuario.RolDescripcion
             };
 
+            var btnClave = Estilo.Boton("Mi contraseña", 0, 12, 130, 36, false);
+            btnClave.Click += (s, e) =>
+            {
+                using (var f = new FrmCambiarClave()) f.ShowDialog(this);
+            };
+
             var btnSalir = Estilo.Boton("Cerrar sesión", 0, 12, 130, 36, false);
             btnSalir.Click += (s, e) => Close();   // el Login vuelve a mostrarse solo
 
-            barra.Controls.AddRange(new Control[] { lblSeccion, lblUsuario, btnSalir });
+            barra.Controls.AddRange(new Control[] { lblSeccion, lblUsuario, btnClave, btnSalir });
             barra.Resize += (s, e) =>
             {
                 btnSalir.Left = barra.Width - btnSalir.Width - 24;
-                lblUsuario.Left = btnSalir.Left - lblUsuario.Width - 12;
+                btnClave.Left = btnSalir.Left - btnClave.Width - 10;
+                lblUsuario.Left = btnClave.Left - lblUsuario.Width - 12;
             };
 
             Controls.Add(barra);
@@ -171,9 +180,9 @@ namespace Belisa
 
             AgregarItem("menuclientes", "Clientes", () => new FrmCliente());
             AgregarItem("menuproveedor", "Proveedores", () => new FrmProveedor());
-            AgregarItem("menuusuarios", "Usuarios", () => new FrmPendiente("Usuarios"));
-            AgregarItem("menureportes", "Reportes", () => new FrmPendiente("Reportes"));
-            AgregarItem("menuacercade", "Acerca de", () => new FrmPendiente("Acerca de"));
+            AgregarItem("menuusuarios", "Usuarios", () => new FrmUsuario());
+            AgregarItem("menureportes", "Reportes", () => new FrmReportes());
+            AgregarItem("menuacercade", "Acerca de", () => new FrmAcercaDe());
 
             lateral.Controls.Add(menu);
             lateral.Controls.Add(cabecera);
@@ -266,6 +275,7 @@ namespace Belisa
     }
 
     // Botón del menú lateral: resalta el elemento activo con una barra lila
+    [DesignerCategory("Code")]
     public class BotonMenu : Button
     {
         private bool activo;

@@ -139,6 +139,8 @@
     <Compile Include="BuscadorProducto.cs" />
     <Compile Include="Estilo.cs" />
     <Compile Include="Exportar.cs" />
+    <Compile Include="FrmAcercaDe.cs" />
+    <Compile Include="FrmCambiarClave.cs" />
     <Compile Include="FrmCategoria.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -157,11 +159,11 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FrmProveedor.cs" />
+    <Compile Include="FrmReportes.cs" />
     <Compile Include="FrmTicketConfig.cs" />
+    <Compile Include="FrmUsuario.cs" />
     <Compile Include="FrmVenta.cs" />
-    <Compile Include="Inicio.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Inicio.cs" />
     <Compile Include="Login.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -19,7 +19,8 @@ namespace Belisa
         private List<Producto> productos = new List<Producto>();
         private readonly List<DetalleCompra> carrito = new List<DetalleCompra>();
 
-        private ComboBox cmbProveedor, cmbTipo;
+        private ComboBox cmbProveedor, cmbTipo, cmbMetodo;
+        private TextBox txtReferencia;
         private BuscadorProducto buscador;
         private NumericUpDown numCantidad, numCompra, numVenta;
         private Label lblInfo, lblMensaje, lblTotal;
@@ -126,7 +127,7 @@ namespace Belisa
             cmbProveedor = new ComboBox
             {
                 Location = new Point(20, 38),
-                Width = 380,
+                Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = Estilo.Normal,
                 DisplayMember = "RazonSocial",
@@ -135,13 +136,29 @@ namespace Belisa
 
             cmbTipo = new ComboBox
             {
-                Location = new Point(420, 38),
-                Width = 200,
+                Location = new Point(340, 38),
+                Width = 170,
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = Estilo.Normal
             };
             cmbTipo.Items.AddRange(new object[] { "Ticket", "Nota de remisión", "Factura", "Otro" });
             cmbTipo.SelectedIndex = 0;
+
+            cmbMetodo = new ComboBox
+            {
+                Location = new Point(530, 38),
+                Width = 150,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = Estilo.Normal
+            };
+            cmbMetodo.Items.AddRange(CompraN.MetodosPago);
+
+            txtReferencia = Estilo.Campo(700, 38, 200);
+            txtReferencia.MaxLength = 50;
+
+            // La referencia (folio, últimos dígitos, clave de rastreo) solo aplica si no fue en efectivo
+            cmbMetodo.SelectedIndexChanged += (s, e) => ActualizarReferencia();
+            cmbMetodo.SelectedIndex = 0;
 
             buscador = new BuscadorProducto { Location = new Point(20, 108), Width = 380 };
             numCantidad = Num(420, 108, 90, 0, CantidadMaxima);
@@ -176,7 +193,9 @@ namespace Belisa
             tarjeta.Controls.AddRange(new Control[]
             {
                 Estilo.Etiqueta("Proveedor", 20, 14), cmbProveedor,
-                Estilo.Etiqueta("Tipo de documento", 420, 14), cmbTipo,
+                Estilo.Etiqueta("Tipo de documento", 340, 14), cmbTipo,
+                Estilo.Etiqueta("Método de pago", 530, 14), cmbMetodo,
+                Estilo.Etiqueta("Referencia (opcional)", 700, 14), txtReferencia,
                 Estilo.Etiqueta("Producto (código o nombre)", 20, 84), buscador,
                 Estilo.Etiqueta("Cantidad", 420, 84), numCantidad,
                 Estilo.Etiqueta("P. compra", 525, 84), numCompra,
@@ -186,6 +205,13 @@ namespace Belisa
 
             arriba.Controls.Add(tarjeta);
             padre.Controls.Add(arriba);
+        }
+
+        private void ActualizarReferencia()
+        {
+            bool efectivo = Convert.ToString(cmbMetodo.SelectedItem) == "Efectivo";
+            txtReferencia.Enabled = !efectivo;
+            if (efectivo) txtReferencia.Clear();
         }
 
         private static NumericUpDown Num(int x, int y, int ancho, int decimales, decimal max)
@@ -346,6 +372,8 @@ namespace Belisa
             lblMensaje.Text = "";
             cmbProveedor.SelectedIndex = -1;
             cmbTipo.SelectedIndex = 0;
+            cmbMetodo.SelectedIndex = 0;   // si estaba en tarjeta, esto también limpia la referencia
+            txtReferencia.Clear();
         }
 
         // ---------- Registrar ----------
@@ -369,9 +397,11 @@ namespace Belisa
 
             decimal total = carrito.Sum(d => d.Cantidad * d.PrecioCompra);
             string proveedor = ((Proveedor)cmbProveedor.SelectedItem).RazonSocial;
+            string metodo = Convert.ToString(cmbMetodo.SelectedItem);
 
             if (MessageBox.Show(
-                    "¿Registrar la compra a " + proveedor + " por " + total.ToString("C2") + "?\n\n" +
+                    "¿Registrar la compra a " + proveedor + " por " + total.ToString("C2")
+                    + ", pagada con " + metodo.ToLower() + "?\n\n" +
                     "El stock y los precios de los productos se actualizarán.",
                     "Confirmar compra", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
@@ -380,6 +410,8 @@ namespace Belisa
             {
                 IdProveedor = (int)cmbProveedor.SelectedValue,
                 TipoDocumento = Convert.ToString(cmbTipo.SelectedItem),
+                MetodoPago = metodo,
+                ReferenciaPago = txtReferencia.Text,
                 Detalle = carrito.Select(d => new DetalleCompra
                 {
                     IdProducto = d.IdProducto,

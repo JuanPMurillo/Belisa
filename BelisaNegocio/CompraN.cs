@@ -8,6 +8,8 @@ namespace BelisaNegocio
 {
     public class CompraN
     {
+        public static readonly string[] MetodosPago = { "Efectivo", "Tarjeta", "Transferencia" };
+
         private const decimal ImporteMaximo = 99999999.99m;
         private const int CantidadMaxima = 1000000;
 
@@ -39,6 +41,19 @@ namespace BelisaNegocio
             if (c.TipoDocumento.Length == 0 || c.TipoDocumento.Length > 50)
             {
                 mensaje = "Selecciona el tipo de documento.";
+                return false;
+            }
+
+            if (!MetodosPago.Contains(c.MetodoPago))
+            {
+                mensaje = "Selecciona el método de pago.";
+                return false;
+            }
+
+            c.ReferenciaPago = (c.ReferenciaPago ?? "").Trim();
+            if (c.ReferenciaPago.Length > 50)
+            {
+                mensaje = "La referencia no puede pasar de 50 caracteres.";
                 return false;
             }
 

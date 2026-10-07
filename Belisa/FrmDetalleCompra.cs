@@ -46,7 +46,8 @@ namespace Belisa
             Tabla.ColumnaFija(gridCompras, "Fecha", "Fecha", 150, null, false);
             Tabla.ColumnaFija(gridCompras, "Numero", "Número", 110, null, false);
             Tabla.Columna(gridCompras, "Proveedor", "Proveedor", 160);
-            Tabla.ColumnaFija(gridCompras, "Tipo", "Documento", 140, null, false);
+            Tabla.ColumnaFija(gridCompras, "Tipo", "Documento", 130, null, false);
+            Tabla.ColumnaFija(gridCompras, "Pago", "Pago", 110, null, false);
             Tabla.Columna(gridCompras, "Usuario", "Registró", 110);
             Tabla.ColumnaFija(gridCompras, "Total", "Total", 120, "C2", true);
 
@@ -188,7 +189,9 @@ namespace Belisa
                 || (c.NumeroDocumento ?? "").ToLower().Contains(filtro)
                 || (c.ProveedorNombre ?? "").ToLower().Contains(filtro)
                 || (c.UsuarioNombre ?? "").ToLower().Contains(filtro)
-                || (c.TipoDocumento ?? "").ToLower().Contains(filtro)).ToList();
+                || (c.TipoDocumento ?? "").ToLower().Contains(filtro)
+                || (c.MetodoPago ?? "").ToLower().Contains(filtro)
+                || (c.ReferenciaPago ?? "").ToLower().Contains(filtro)).ToList();
 
             lblResumen.Text = vista.Count + " compras  ·  " + vista.Sum(c => c.MontoTotal).ToString("C2");
 
@@ -197,7 +200,7 @@ namespace Belisa
             {
                 int i = gridCompras.Rows.Add(c.FechaRegistro.ToString("dd/MM/yyyy HH:mm"),
                                              c.NumeroDocumento, c.ProveedorNombre, c.TipoDocumento,
-                                             c.UsuarioNombre, c.MontoTotal);
+                                             c.MetodoPago, c.UsuarioNombre, c.MontoTotal);
                 gridCompras.Rows[i].Tag = c;
             }
 
@@ -227,7 +230,9 @@ namespace Belisa
             detalleActual = detalle;
             btnComprobante.Enabled = true;
 
-            lblTituloDetalle.Text = "Detalle de " + c.NumeroDocumento + "  ·  " + c.ProveedorNombre;
+            string titulo = "Detalle de " + c.NumeroDocumento + "  ·  " + c.ProveedorNombre + "  ·  " + c.MetodoPago;
+            if (!string.IsNullOrEmpty(c.ReferenciaPago)) titulo += " (ref. " + c.ReferenciaPago + ")";
+            lblTituloDetalle.Text = titulo;
 
             gridDetalle.Rows.Clear();
             foreach (var d in detalle)

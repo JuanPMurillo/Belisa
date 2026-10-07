@@ -26,6 +26,8 @@ namespace BelisaDatos
                 cmd.Parameters.Add("@IdUsuario", SqlDbType.Int).Value = c.IdUsuario;
                 cmd.Parameters.Add("@IdProveedor", SqlDbType.Int).Value = c.IdProveedor;
                 cmd.Parameters.Add("@TipoDocumento", SqlDbType.VarChar, 50).Value = c.TipoDocumento;
+                cmd.Parameters.Add("@MetodoPago", SqlDbType.VarChar, 30).Value = c.MetodoPago;
+                cmd.Parameters.Add("@ReferenciaPago", SqlDbType.VarChar, 50).Value = Ayuda.ANullable(c.ReferenciaPago);
 
                 var pDetalle = cmd.Parameters.Add("@Detalle", SqlDbType.Structured);
                 pDetalle.TypeName = "dbo.EDetalle_Compra";
@@ -66,6 +68,8 @@ namespace BelisaDatos
                             IdCompra = Convert.ToInt32(rdr["IdCompra"]),
                             NumeroDocumento = Convert.ToString(rdr["NumeroDocumento"]),
                             TipoDocumento = Convert.ToString(rdr["TipoDocumento"]),
+                            MetodoPago = Convert.ToString(rdr["MetodoPago"]),
+                            ReferenciaPago = Ayuda.Texto(rdr["ReferenciaPago"]),
                             MontoTotal = Convert.ToDecimal(rdr["MontoTotal"]),
                             FechaRegistro = Convert.ToDateTime(rdr["FechaRegistro"]),
                             IdProveedor = Convert.ToInt32(rdr["IdProveedor"]),
