@@ -37,6 +37,7 @@ namespace BelisaEntidad
         public int IdCategoria { get; set; }
         public string CategoriaDescripcion { get; set; }
         public int Stock { get; set; }
+        public int StockMinimo { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
         public string Descripcion { get; set; }
@@ -69,6 +70,7 @@ namespace BelisaEntidad
         public int IdUsuario { get; set; }
         public int IdProveedor { get; set; }
         public string ProveedorNombre { get; set; }
+        public string UsuarioNombre { get; set; }
         public string TipoDocumento { get; set; }
         public string NumeroDocumento { get; set; }
         public decimal MontoTotal { get; set; }

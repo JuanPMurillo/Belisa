@@ -26,7 +26,7 @@ namespace Belisa
 
             Text = "Belisa - Punto de venta";
             Icon = Estilo.IconoApp;
-            MinimumSize = new Size(1000, 650);
+            MinimumSize = new Size(1200, 680);
             WindowState = FormWindowState.Maximized;
             BackColor = Estilo.Fondo;
 
@@ -164,13 +164,13 @@ namespace Belisa
                 new Func<Form>[] { () => new FrmPendiente("Registrar venta"), () => new FrmPendiente("Detalle de ventas") });
 
             AgregarItem("menucompras", "Compras", new[] { "Registrar compra", "Ver detalle" },
-                new Func<Form>[] { () => new FrmPendiente("Registrar compra"), () => new FrmPendiente("Detalle de compras") });
+                new Func<Form>[] { () => new FrmCompra(), () => new FrmDetalleCompra() });
 
             AgregarItem("menugestion", "Gestión", new[] { "Categorías", "Productos" },
-                new Func<Form>[] { () => new FrmCategoria(), () => new FrmPendiente("Productos") });
+                new Func<Form>[] { () => new FrmCategoria(), () => new FrmProducto() });
 
-            AgregarItem("menuclientes", "Clientes", () => new FrmPendiente("Clientes"));
-            AgregarItem("menuproveedor", "Proveedores", () => new FrmPendiente("Proveedores"));
+            AgregarItem("menuclientes", "Clientes", () => new FrmCliente());
+            AgregarItem("menuproveedor", "Proveedores", () => new FrmProveedor());
             AgregarItem("menuusuarios", "Usuarios", () => new FrmPendiente("Usuarios"));
             AgregarItem("menureportes", "Reportes", () => new FrmPendiente("Reportes"));
             AgregarItem("menuacercade", "Acerca de", () => new FrmPendiente("Acerca de"));

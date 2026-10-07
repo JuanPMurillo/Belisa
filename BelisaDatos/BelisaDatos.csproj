@@ -42,10 +42,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ayuda.cs" />
     <Compile Include="CategoriaD.cs" />
+    <Compile Include="ClienteD.cs" />
+    <Compile Include="CompraD.cs" />
     <Compile Include="Conexion.cs" />
     <Compile Include="CredencialUsuario.cs" />
+    <Compile Include="ProductoD.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProveedorD.cs" />
     <Compile Include="UsuarioD.cs" />
   </ItemGroup>
   <ItemGroup>
