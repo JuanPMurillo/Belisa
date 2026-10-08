@@ -12,7 +12,10 @@ namespace Belisa
     [DesignerCategory("Code")]
     public class FrmDetalleCompra : Form
     {
+        private static readonly Font Tachado = new Font(Estilo.Normal, FontStyle.Strikeout);
+
         private readonly CompraN negocio = new CompraN();
+        private readonly AnulacionN anulacion = new AnulacionN();
         private List<Compra> compras = new List<Compra>();
         private Compra compraActual;
         private List<DetalleCompra> detalleActual = new List<DetalleCompra>();
@@ -23,7 +26,7 @@ namespace Belisa
         private TextBox txtFiltro;
         private Label lblResumen, lblTituloDetalle;
         private DataGridView gridCompras, gridDetalle;
-        private Button btnComprobante;
+        private Button btnComprobante, btnAnular;
 
         public FrmDetalleCompra()
         {
@@ -49,6 +52,7 @@ namespace Belisa
             Tabla.ColumnaFija(gridCompras, "Tipo", "Documento", 130, null, false);
             Tabla.ColumnaFija(gridCompras, "Pago", "Pago", 110, null, false);
             Tabla.Columna(gridCompras, "Usuario", "Registró", 110);
+            Tabla.ColumnaFija(gridCompras, "Estado", "Estado", 100, null, false);
             Tabla.ColumnaFija(gridCompras, "Total", "Total", 120, "C2", true);
 
             gridCompras.SelectionChanged += (s, e) =>
@@ -78,20 +82,30 @@ namespace Belisa
             {
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft,
+                AutoEllipsis = true,
                 Font = Estilo.Negrita,
                 ForeColor = Estilo.Texto,
                 Text = "Selecciona una compra para ver su detalle"
             };
 
-            btnComprobante = Estilo.Boton("Comprobante PDF", 0, 2, 170, 34, false);
+            btnAnular = Estilo.Boton("Anular compra", 0, 2, 150, 34, false);
+            btnAnular.ForeColor = Estilo.Error;
+            btnAnular.FlatAppearance.BorderColor = Estilo.Error;
+            btnAnular.Visible = Sesion.TienePermiso("anular");   // solo el administrador
+            btnAnular.Enabled = false;
+            btnAnular.Click += (s, e) => Anular();
+
+            btnComprobante = Estilo.Boton("Comprobante PDF", 160, 2, 170, 34, false);
             btnComprobante.Enabled = false;
             btnComprobante.Click += (s, e) => Comprobante();
-            var panelBoton = new Panel { Dock = DockStyle.Right, Width = 178 };
-            panelBoton.Controls.Add(btnComprobante);
+
+            var panelBotones = new Panel { Dock = DockStyle.Right, Width = 338 };
+            panelBotones.Controls.Add(btnAnular);
+            panelBotones.Controls.Add(btnComprobante);
 
             var cabecera = new Panel { Dock = DockStyle.Top, Height = 38 };
             cabecera.Controls.Add(lblTituloDetalle);   // Fill primero
-            cabecera.Controls.Add(panelBoton);         // luego el botón a la derecha
+            cabecera.Controls.Add(panelBotones);       // luego los botones a la derecha
 
             tarjeta.Controls.Add(gridDetalle);   // Fill primero
             tarjeta.Controls.Add(cabecera);      // luego arriba
@@ -106,7 +120,7 @@ namespace Belisa
             lblResumen = new Label
             {
                 Dock = DockStyle.Right,
-                Width = 250,
+                Width = 400,
                 TextAlign = ContentAlignment.MiddleRight,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
@@ -153,13 +167,18 @@ namespace Belisa
 
         private void Buscar()
         {
+            Cargar(dtDesde.Value.Date, dtHasta.Value.Date);
+        }
+
+        private void Cargar(DateTime desde, DateTime hasta)
+        {
             // Se recuerda el rango realmente buscado para ponerlo en el reporte
-            desdeUsado = dtDesde.Value.Date;
-            hastaUsado = dtHasta.Value.Date;
+            desdeUsado = desde;
+            hastaUsado = hasta;
 
             try
             {
-                compras = negocio.Listar(dtDesde.Value, dtHasta.Value);
+                compras = negocio.Listar(desde, hasta);
             }
             catch (Exception ex)
             {
@@ -191,17 +210,33 @@ namespace Belisa
                 || (c.UsuarioNombre ?? "").ToLower().Contains(filtro)
                 || (c.TipoDocumento ?? "").ToLower().Contains(filtro)
                 || (c.MetodoPago ?? "").ToLower().Contains(filtro)
-                || (c.ReferenciaPago ?? "").ToLower().Contains(filtro)).ToList();
+                || (c.ReferenciaPago ?? "").ToLower().Contains(filtro)
+                || (c.Anulada ? "anulada" : "vigente").Contains(filtro)).ToList();
 
-            lblResumen.Text = vista.Count + " compras  ·  " + vista.Sum(c => c.MontoTotal).ToString("C2");
+            // Las anuladas se ven en la lista pero no suman
+            var vigentes = vista.Where(c => !c.Anulada).ToList();
+            int anuladas = vista.Count - vigentes.Count;
+
+            lblResumen.Text = vigentes.Count + " compras  ·  " + vigentes.Sum(c => c.MontoTotal).ToString("C2")
+                              + (anuladas > 0 ? "  ·  " + anuladas + (anuladas == 1 ? " anulada" : " anuladas") : "");
 
             gridCompras.Rows.Clear();
             foreach (var c in vista)
             {
+                // En las anuladas el dinero se muestra en cero: así los totales de Excel y PDF salen bien
                 int i = gridCompras.Rows.Add(c.FechaRegistro.ToString("dd/MM/yyyy HH:mm"),
                                              c.NumeroDocumento, c.ProveedorNombre, c.TipoDocumento,
-                                             c.MetodoPago, c.UsuarioNombre, c.MontoTotal);
-                gridCompras.Rows[i].Tag = c;
+                                             c.MetodoPago, c.UsuarioNombre,
+                                             c.Anulada ? "ANULADA" : "Vigente",
+                                             c.Anulada ? 0m : c.MontoTotal);
+                var fila = gridCompras.Rows[i];
+                fila.Tag = c;
+
+                if (c.Anulada)
+                {
+                    fila.DefaultCellStyle.ForeColor = Color.Gray;
+                    fila.DefaultCellStyle.Font = Tachado;
+                }
             }
 
             gridCompras.ClearSelection();
@@ -209,6 +244,7 @@ namespace Belisa
             compraActual = null;
             detalleActual = new List<DetalleCompra>();
             btnComprobante.Enabled = false;
+            btnAnular.Enabled = false;
             lblTituloDetalle.Text = "Selecciona una compra para ver su detalle";
             cargando = false;
         }
@@ -228,11 +264,23 @@ namespace Belisa
 
             compraActual = c;
             detalleActual = detalle;
-            btnComprobante.Enabled = true;
 
-            string titulo = "Detalle de " + c.NumeroDocumento + "  ·  " + c.ProveedorNombre + "  ·  " + c.MetodoPago;
-            if (!string.IsNullOrEmpty(c.ReferenciaPago)) titulo += " (ref. " + c.ReferenciaPago + ")";
-            lblTituloDetalle.Text = titulo;
+            bool vigente = !c.Anulada;
+            btnComprobante.Enabled = vigente;
+            btnAnular.Enabled = vigente;
+
+            if (c.Anulada)
+            {
+                lblTituloDetalle.Text = "ANULADA el " + (c.FechaAnulacion.HasValue ? c.FechaAnulacion.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                                        + " por " + c.AnuladaPor + "  ·  Motivo: " + c.MotivoAnulacion
+                                        + "  ·  " + c.NumeroDocumento + " por " + c.MontoTotal.ToString("C2");
+            }
+            else
+            {
+                string titulo = "Detalle de " + c.NumeroDocumento + "  ·  " + c.ProveedorNombre + "  ·  " + c.MetodoPago;
+                if (!string.IsNullOrEmpty(c.ReferenciaPago)) titulo += " (ref. " + c.ReferenciaPago + ")";
+                lblTituloDetalle.Text = titulo;
+            }
 
             gridDetalle.Rows.Clear();
             foreach (var d in detalle)
@@ -243,6 +291,8 @@ namespace Belisa
             gridDetalle.ClearSelection();
         }
 
+        // ---------- Acciones ----------
+
         private void Comprobante()
         {
             if (compraActual == null) return;
@@ -251,6 +301,48 @@ namespace Belisa
             var detalle = detalleActual;
             Exportar.GuardarPdf("Compra_" + compra.NumeroDocumento,
                 ruta => ReportePdf.ComprobanteCompra(compra, detalle, ruta));
+        }
+
+        private void Anular()
+        {
+            if (compraActual == null || compraActual.Anulada) return;
+
+            var compra = compraActual;
+            string resumen = "Vas a anular la compra " + compra.NumeroDocumento + " a " + compra.ProveedorNombre
+                           + " por " + compra.MontoTotal.ToString("C2") + ".\n\n"
+                           + "Los productos de esta compra salen del inventario (si ya vendiste parte de ellos, "
+                           + "el sistema no te deja). Los precios de los productos NO regresan a como estaban. "
+                           + "Esto no se puede deshacer.";
+
+            string motivo;
+            using (var f = new FrmMotivo("Anular compra", resumen))
+            {
+                if (f.ShowDialog(this) != DialogResult.OK) return;
+                motivo = f.Motivo;
+            }
+
+            bool ok;
+            string mensaje;
+            try
+            {
+                ok = anulacion.AnularCompra(compra.IdCompra, motivo, out mensaje);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Compras", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!ok)
+            {
+                MessageBox.Show(mensaje, "No se pudo anular", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Cargar(desdeUsado, hastaUsado);   // por si alguien más ya la había anulado
+                return;
+            }
+
+            MessageBox.Show("Compra " + compra.NumeroDocumento + " anulada.\nLos productos ya salieron del inventario.",
+                "Listo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Cargar(desdeUsado, hastaUsado);
         }
     }
 }

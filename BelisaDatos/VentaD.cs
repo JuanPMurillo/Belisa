@@ -93,7 +93,12 @@ namespace BelisaDatos
                             IdCliente = rdr["IdCliente"] == DBNull.Value ? (int?)null : Convert.ToInt32(rdr["IdCliente"]),
                             ClienteNombre = Convert.ToString(rdr["ClienteNombre"]),
                             IdUsuario = Convert.ToInt32(rdr["IdUsuario"]),
-                            UsuarioNombre = Convert.ToString(rdr["UsuarioNombre"])
+                            UsuarioNombre = Convert.ToString(rdr["UsuarioNombre"]),
+                            Anulada = Convert.ToBoolean(rdr["Anulada"]),
+                            FechaAnulacion = rdr["FechaAnulacion"] == DBNull.Value
+                                ? (DateTime?)null : Convert.ToDateTime(rdr["FechaAnulacion"]),
+                            AnuladaPor = Ayuda.Texto(rdr["AnuladaPor"]),
+                            MotivoAnulacion = Ayuda.Texto(rdr["MotivoAnulacion"])
                         });
                     }
                 }

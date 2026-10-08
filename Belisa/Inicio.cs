@@ -47,6 +47,7 @@ namespace Belisa
 
             Sesion.Iniciar(usuario, permisos);
             FormClosed += (s, e) => Sesion.Cerrar();
+            FormClosed += (s, e) => RespaldoAutomatico();
 
             // El orden importa: lo que se agrega primero ocupa el centro,
             // lo que se agrega al final queda en los bordes
@@ -57,7 +58,15 @@ namespace Belisa
 
             MostrarBienvenida();
         }
-
+        // Una vez al día, al cerrar sesión, se guarda un respaldo de la base de datos
+        private void RespaldoAutomatico()
+        {
+            string mensaje;
+            if (!new RespaldoN().RespaldoAutomaticoSiToca(out mensaje))
+            {
+                MessageBox.Show(mensaje, "Respaldo automático", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
         // ---------- Construcción de la pantalla ----------
 
         private void ConstruirContenedor()
@@ -181,6 +190,7 @@ namespace Belisa
             AgregarItem("menuclientes", "Clientes", () => new FrmCliente());
             AgregarItem("menuproveedor", "Proveedores", () => new FrmProveedor());
             AgregarItem("menuusuarios", "Usuarios", () => new FrmUsuario());
+            AgregarItem("menurespaldo", "Respaldos", () => new FrmRespaldo());
             AgregarItem("menureportes", "Reportes", () => new FrmReportes());
             AgregarItem("menuacercade", "Acerca de", () => new FrmAcercaDe());
 

@@ -54,8 +54,7 @@ namespace BelisaDatos
                 cmd.Parameters.Add("@StockMinimo", SqlDbType.Int).Value = p.StockMinimo;
                 cmd.Parameters.Add(Dinero("@PrecioCompra", p.PrecioCompra));
                 cmd.Parameters.Add(Dinero("@PrecioVenta", p.PrecioVenta));
-                cmd.Parameters.Add("@Descripcion", SqlDbType.VarChar, 200).Value =
-                    string.IsNullOrWhiteSpace(p.Descripcion) ? (object)DBNull.Value : p.Descripcion;
+                cmd.Parameters.Add("@Descripcion", SqlDbType.VarChar, 200).Value = Ayuda.ANullable(p.Descripcion);
                 cmd.Parameters.Add("@Estado", SqlDbType.Bit).Value = p.Estado;
 
                 var pId = cmd.Parameters.Add("@IdGenerado", SqlDbType.Int);
@@ -70,7 +69,6 @@ namespace BelisaDatos
                 }
                 catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
                 {
-                    // Dos personas guardaron el mismo código al mismo tiempo
                     mensaje = "No se pudo asignar el código. Intenta de nuevo.";
                     return 0;
                 }

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnulacionD.cs" />
     <Compile Include="Ayuda.cs" />
     <Compile Include="CategoriaD.cs" />
     <Compile Include="ClienteD.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="ProductoD.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProveedorD.cs" />
+    <Compile Include="RespaldoD.cs" />
     <Compile Include="UsuarioD.cs" />
     <Compile Include="VentaD.cs" />
   </ItemGroup>

@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnulacionN.cs" />
     <Compile Include="CategoriaN.cs" />
     <Compile Include="ClienteN.cs" />
     <Compile Include="CompraN.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProveedorN.cs" />
     <Compile Include="ReporteN.cs" />
+    <Compile Include="RespaldoN.cs" />
     <Compile Include="SeguridadClave.cs" />
     <Compile Include="Sesion.cs" />
     <Compile Include="UsuarioN.cs" />

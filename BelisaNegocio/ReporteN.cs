@@ -52,8 +52,9 @@ namespace BelisaNegocio
                 hasta = temporal;
             }
 
-            var ventas = ventaD.Listar(desde, hasta, null);   // null = las ventas de todos
-            var compras = compraD.Listar(desde, hasta);
+            // Las anuladas no cuentan en ningún total
+            var ventas = ventaD.Listar(desde, hasta, null).Where(v => !v.Anulada).ToList();   // null = las ventas de todos
+            var compras = compraD.Listar(desde, hasta).Where(c => !c.Anulada).ToList();
             var activos = productoD.Listar().Where(p => p.Estado).ToList();
 
             var r = new ResumenReporte { Desde = desde.Date, Hasta = hasta.Date };

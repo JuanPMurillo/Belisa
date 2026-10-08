@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -8,6 +9,7 @@ using BelisaNegocio;
 
 namespace Belisa
 {
+    [DesignerCategory("Code")]
     public class FrmProducto : Form
     {
         private readonly ProductoN negocio = new ProductoN();
@@ -20,7 +22,7 @@ namespace Belisa
         private bool cargando;
 
         private DataGridView grid;
-        private TextBox txtBuscar, txtCodigo, txtNombre, txtDescripcion;
+        private TextBox txtBuscar, txtNombre, txtDescripcion;
         private CheckBox chkStockBajo, chkActivo;
         private ComboBox cmbCategoria;
         private NumericUpDown numCompra, numVenta, numStock, numStockMin;
@@ -160,20 +162,12 @@ namespace Belisa
                 ForeColor = Estilo.Texto
             };
 
-            txtCodigo = Estilo.Campo(28, 86, 344);
-            txtCodigo.MaxLength = 100;
-            txtCodigo.KeyDown += (s, e) =>
-            {
-                // El lector de código de barras termina con Enter: pasamos al nombre
-                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; txtNombre.Focus(); }
-            };
-
-            txtNombre = Estilo.Campo(28, 152, 344);
+            txtNombre = Estilo.Campo(28, 86, 344);
             txtNombre.MaxLength = 100;
 
             cmbCategoria = new ComboBox
             {
-                Location = new Point(28, 218),
+                Location = new Point(28, 152),
                 Width = 344,
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = Estilo.Normal,
@@ -181,18 +175,18 @@ namespace Belisa
                 ValueMember = "IdCategoria"
             };
 
-            numCompra = Num(28, 284, 164, 2, 99999999.99m);
-            numVenta = Num(212, 284, 160, 2, 99999999.99m);
-            numStock = Num(28, 350, 164, 0, 1000000);
-            numStockMin = Num(212, 350, 160, 0, 1000000);
+            numCompra = Num(28, 218, 164, 2, 99999999.99m);
+            numVenta = Num(212, 218, 160, 2, 99999999.99m);
+            numStock = Num(28, 284, 164, 0, 1000000);
+            numStockMin = Num(212, 284, 160, 0, 1000000);
 
-            lblStock = Estilo.Etiqueta("Stock inicial", 28, 326);
-            var lblStockMin = Estilo.Etiqueta("Stock mínimo", 212, 326);
+            lblStock = Estilo.Etiqueta("Stock inicial", 28, 260);
+            var lblStockMin = Estilo.Etiqueta("Stock mínimo", 212, 260);
             ayuda.SetToolTip(lblStock, "El stock solo se captura al crear el producto.\nDespués cambia con las compras y las ventas.");
             ayuda.SetToolTip(lblStockMin, "Cuando el stock llegue a este número, el producto se marca como stock bajo.");
             ayuda.SetToolTip(numStockMin, "Cuando el stock llegue a este número, el producto se marca como stock bajo.");
 
-            txtDescripcion = Estilo.Campo(28, 416, 344);
+            txtDescripcion = Estilo.Campo(28, 350, 344);
             txtDescripcion.MaxLength = 200;
             txtDescripcion.KeyDown += (s, e) =>
             {
@@ -202,7 +196,7 @@ namespace Belisa
             chkActivo = new CheckBox
             {
                 Text = "Producto activo",
-                Location = new Point(28, 458),
+                Location = new Point(28, 392),
                 AutoSize = true,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
@@ -210,27 +204,26 @@ namespace Belisa
 
             lblMensaje = new Label
             {
-                Location = new Point(28, 488),
+                Location = new Point(28, 422),
                 Size = new Size(344, 40),
                 Font = Estilo.Normal
             };
 
-            btnGuardar = Estilo.Boton("Guardar", 28, 536, 210, 42, true);
+            btnGuardar = Estilo.Boton("Guardar", 28, 470, 210, 42, true);
             btnGuardar.Click += (s, e) => Guardar();
 
-            btnNuevo = Estilo.Boton("Nuevo", 250, 536, 122, 42, false);
+            btnNuevo = Estilo.Boton("Nuevo", 250, 470, 122, 42, false);
             btnNuevo.Click += (s, e) => Nuevo();
 
             panel.Controls.AddRange(new Control[]
             {
                 lblTitulo,
-                Estilo.Etiqueta("Código", 28, 62), txtCodigo,
-                Estilo.Etiqueta("Nombre", 28, 128), txtNombre,
-                Estilo.Etiqueta("Categoría", 28, 194), cmbCategoria,
-                Estilo.Etiqueta("Precio de compra", 28, 260), numCompra,
-                Estilo.Etiqueta("Precio de venta", 212, 260), numVenta,
+                Estilo.Etiqueta("Nombre", 28, 62), txtNombre,
+                Estilo.Etiqueta("Categoría", 28, 128), cmbCategoria,
+                Estilo.Etiqueta("Precio de compra", 28, 194), numCompra,
+                Estilo.Etiqueta("Precio de venta", 212, 194), numVenta,
                 lblStock, numStock, lblStockMin, numStockMin,
-                Estilo.Etiqueta("Descripción (opcional)", 28, 392), txtDescripcion,
+                Estilo.Etiqueta("Descripción (opcional)", 28, 326), txtDescripcion,
                 chkActivo, lblMensaje, btnGuardar, btnNuevo,
                 new Panel { Dock = DockStyle.Left, Width = 1, BackColor = Estilo.LilaClaro }
             });
@@ -333,7 +326,6 @@ namespace Belisa
         {
             seleccion = p;
             lblTitulo.Text = "Editar producto";
-            txtCodigo.Text = p.Codigo;
             txtNombre.Text = p.Nombre;
             LlenarCategorias(p.IdCategoria);
             cmbCategoria.SelectedValue = p.IdCategoria;
@@ -352,7 +344,6 @@ namespace Belisa
         {
             seleccion = null;
             lblTitulo.Text = "Nuevo producto";
-            txtCodigo.Clear();
             txtNombre.Clear();
             LlenarCategorias(null);
             cmbCategoria.SelectedIndex = -1;
@@ -371,17 +362,17 @@ namespace Belisa
             grid.ClearSelection();
             cargando = false;
 
-            txtCodigo.Focus();
+            txtNombre.Focus();
         }
 
         private void Guardar()
         {
             lblMensaje.Text = "";
+            bool esNuevo = seleccion == null;
 
             var p = new Producto
             {
-                IdProducto = seleccion == null ? 0 : seleccion.IdProducto,
-                Codigo = txtCodigo.Text,
+                IdProducto = esNuevo ? 0 : seleccion.IdProducto,
                 Nombre = txtNombre.Text,
                 IdCategoria = cmbCategoria.SelectedValue == null ? 0 : (int)cmbCategoria.SelectedValue,
                 Stock = (int)numStock.Value,
@@ -414,7 +405,8 @@ namespace Belisa
                 if (guardado != null) Mostrar(guardado); else Nuevo();
 
                 lblMensaje.ForeColor = Color.FromArgb(39, 130, 80);
-                lblMensaje.Text = "Guardado correctamente.";
+                lblMensaje.Text = "Guardado correctamente."
+                                  + (esNuevo && guardado != null ? " Código asignado: " + guardado.Codigo : "");
             }
             catch (Exception ex)
             {

@@ -149,17 +149,17 @@
     <Compile Include="FrmContactoBase.cs" />
     <Compile Include="FrmDetalleCompra.cs" />
     <Compile Include="FrmDetalleVenta.cs" />
+    <Compile Include="FrmMotivo.cs" />
     <Compile Include="FrmPendiente.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FrmPrimerAdmin.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmProducto.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="FrmProducto.cs" />
     <Compile Include="FrmProveedor.cs" />
     <Compile Include="FrmReportes.cs" />
+    <Compile Include="FrmRespaldo.cs" />
     <Compile Include="FrmTicketConfig.cs" />
     <Compile Include="FrmUsuario.cs" />
     <Compile Include="FrmVenta.cs" />

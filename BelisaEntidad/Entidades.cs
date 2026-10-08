@@ -17,8 +17,8 @@ namespace BelisaEntidad
         public string Correo { get; set; }
         public int IdRol { get; set; }
         public string RolDescripcion { get; set; }   // solo para mostrar en pantalla
-        public bool Bloqueado { get; set; }   // bloqueado por intentos fallidos
         public bool Estado { get; set; }
+        public bool Bloqueado { get; set; }          // bloqueado por intentos fallidos
         public DateTime FechaRegistro { get; set; }
         // La clave NUNCA vive en esta clase: solo existe como hash en la BD
     }
@@ -71,13 +71,17 @@ namespace BelisaEntidad
         public int IdUsuario { get; set; }
         public int IdProveedor { get; set; }
         public string ProveedorNombre { get; set; }
+        public string UsuarioNombre { get; set; }
         public string MetodoPago { get; set; }       // Efectivo, Tarjeta o Transferencia
         public string ReferenciaPago { get; set; }
-        public string UsuarioNombre { get; set; }
         public string TipoDocumento { get; set; }
         public string NumeroDocumento { get; set; }
         public decimal MontoTotal { get; set; }
         public DateTime FechaRegistro { get; set; }
+        public bool Anulada { get; set; }
+        public DateTime? FechaAnulacion { get; set; }
+        public string AnuladaPor { get; set; }
+        public string MotivoAnulacion { get; set; }
         public List<DetalleCompra> Detalle { get; set; } = new List<DetalleCompra>();
     }
 
@@ -110,6 +114,10 @@ namespace BelisaEntidad
         public decimal MontoCambio { get; set; }
         public decimal MontoTotal { get; set; }
         public DateTime FechaRegistro { get; set; }
+        public bool Anulada { get; set; }
+        public DateTime? FechaAnulacion { get; set; }
+        public string AnuladaPor { get; set; }
+        public string MotivoAnulacion { get; set; }
         public List<DetalleVenta> Detalle { get; set; } = new List<DetalleVenta>();
     }
 

@@ -19,12 +19,10 @@ namespace BelisaNegocio
             Sesion.ExigirPermiso("menugestion");
             mensaje = "";
 
-            p.Codigo = (p.Codigo ?? "").Trim();
+            // El código no se valida: lo asigna la base de datos al crear el producto
             p.Nombre = (p.Nombre ?? "").Trim();
             p.Descripcion = (p.Descripcion ?? "").Trim();
 
-            if (p.Codigo.Length == 0) { mensaje = "El código es obligatorio."; return false; }
-            if (p.Codigo.Length > 100) { mensaje = "El código no puede pasar de 100 caracteres."; return false; }
             if (p.Nombre.Length == 0) { mensaje = "El nombre es obligatorio."; return false; }
             if (p.Nombre.Length > 100) { mensaje = "El nombre no puede pasar de 100 caracteres."; return false; }
             if (p.Descripcion.Length > 200) { mensaje = "La descripción no puede pasar de 200 caracteres."; return false; }

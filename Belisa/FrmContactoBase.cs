@@ -11,7 +11,7 @@ namespace Belisa
     public class Contacto
     {
         public int Id { get; set; }
-        public string Documento { get; set; }
+        public string Documento { get; set; }   // el código automático (CLI-0001, PRV-0001...)
         public string Nombre { get; set; }
         public string Correo { get; set; }
         public string Telefono { get; set; }
@@ -29,7 +29,7 @@ namespace Belisa
         private bool cargando;
 
         private DataGridView grid;
-        private TextBox txtBuscar, txtDocumento, txtNombre, txtTelefono, txtCorreo;
+        private TextBox txtBuscar, txtNombre, txtTelefono, txtCorreo;
         private CheckBox chkActivo;
         private Label lblTitulo, lblMensaje, lblResumen;
         private Button btnGuardar, btnNuevo;
@@ -139,18 +139,11 @@ namespace Belisa
                 ForeColor = Estilo.Texto
             };
 
-            // El código lo asigna la base de datos: el campo solo se puede leer
-            txtDocumento = Estilo.Campo(28, 96, 304);
-            txtDocumento.MaxLength = 50;
-            txtDocumento.ReadOnly = true;
-            txtDocumento.TabStop = false;
-            txtDocumento.BackColor = Estilo.LilaSuave;
-
-            txtNombre = Estilo.Campo(28, 162, 304);
+            txtNombre = Estilo.Campo(28, 96, 304);
             txtNombre.MaxLength = 100;
-            txtTelefono = Estilo.Campo(28, 228, 304);
+            txtTelefono = Estilo.Campo(28, 162, 304);
             txtTelefono.MaxLength = 50;
-            txtCorreo = Estilo.Campo(28, 294, 304);
+            txtCorreo = Estilo.Campo(28, 228, 304);
             txtCorreo.MaxLength = 100;
 
             // Enter pasa al siguiente campo; en el último, guarda
@@ -164,7 +157,7 @@ namespace Belisa
             chkActivo = new CheckBox
             {
                 Text = "Activo",
-                Location = new Point(28, 340),
+                Location = new Point(28, 274),
                 AutoSize = true,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
@@ -172,24 +165,23 @@ namespace Belisa
 
             lblMensaje = new Label
             {
-                Location = new Point(28, 372),
+                Location = new Point(28, 306),
                 Size = new Size(304, 44),
                 Font = Estilo.Normal
             };
 
-            btnGuardar = Estilo.Boton("Guardar", 28, 424, 304, 42, true);
+            btnGuardar = Estilo.Boton("Guardar", 28, 358, 304, 42, true);
             btnGuardar.Click += (s, e) => Guardar();
 
-            btnNuevo = Estilo.Boton("Nuevo " + singular, 28, 476, 304, 36, false);
+            btnNuevo = Estilo.Boton("Nuevo " + singular, 28, 410, 304, 36, false);
             btnNuevo.Click += (s, e) => Nuevo();
 
             panel.Controls.AddRange(new Control[]
             {
                 lblTitulo,
-                Estilo.Etiqueta("Código (automático)", 28, 70), txtDocumento,
-                Estilo.Etiqueta(etiquetaNombre, 28, 136), txtNombre,
-                Estilo.Etiqueta("Teléfono (opcional)", 28, 202), txtTelefono,
-                Estilo.Etiqueta("Correo (opcional)", 28, 268), txtCorreo,
+                Estilo.Etiqueta(etiquetaNombre, 28, 70), txtNombre,
+                Estilo.Etiqueta("Teléfono (opcional)", 28, 136), txtTelefono,
+                Estilo.Etiqueta("Correo (opcional)", 28, 202), txtCorreo,
                 chkActivo, lblMensaje, btnGuardar, btnNuevo,
                 new Panel { Dock = DockStyle.Left, Width = 1, BackColor = Estilo.LilaClaro }
             });
@@ -272,7 +264,6 @@ namespace Belisa
         {
             seleccion = c;
             lblTitulo.Text = "Editar " + singular;
-            txtDocumento.Text = c.Documento;
             txtNombre.Text = c.Nombre;
             txtTelefono.Text = c.Telefono;
             txtCorreo.Text = c.Correo;
@@ -284,7 +275,6 @@ namespace Belisa
         {
             seleccion = null;
             lblTitulo.Text = "Nuevo " + singular;
-            txtDocumento.Text = "Se asigna al guardar";
             txtNombre.Clear();
             txtTelefono.Clear();
             txtCorreo.Clear();
@@ -302,10 +292,11 @@ namespace Belisa
         private void Guardar()
         {
             lblMensaje.Text = "";
+            bool esNuevo = seleccion == null;
 
             var c = new Contacto
             {
-                Id = seleccion == null ? 0 : seleccion.Id,
+                Id = esNuevo ? 0 : seleccion.Id,
                 Documento = "",            // el código lo asigna la base de datos
                 Nombre = txtNombre.Text,
                 Telefono = txtTelefono.Text,
@@ -330,7 +321,8 @@ namespace Belisa
                 if (guardado != null) Mostrar(guardado); else Nuevo();
 
                 lblMensaje.ForeColor = Color.FromArgb(39, 130, 80);
-                lblMensaje.Text = "Guardado correctamente.";
+                lblMensaje.Text = "Guardado correctamente."
+                                  + (esNuevo && guardado != null ? " Código asignado: " + guardado.Documento : "");
             }
             catch (Exception ex)
             {
