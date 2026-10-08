@@ -184,8 +184,8 @@ namespace Belisa
             AgregarItem("menucompras", "Compras", new[] { "Registrar compra", "Ver detalle" },
                 new Func<Form>[] { () => new FrmCompra(), () => new FrmDetalleCompra() });
 
-            AgregarItem("menugestion", "Gestión", new[] { "Categorías", "Productos" },
-                new Func<Form>[] { () => new FrmCategoria(), () => new FrmProducto() });
+            AgregarItem("menugestion", "Gestión", new[] { "Categorías", "Productos y servicios", "Ajuste de inventario" },
+                new Func<Form>[] { () => new FrmCategoria(), () => new FrmProducto(), () => new FrmAjuste() });
 
             AgregarItem("menuclientes", "Clientes", () => new FrmCliente());
             AgregarItem("menuproveedor", "Proveedores", () => new FrmProveedor());

@@ -39,6 +39,7 @@ namespace BelisaEntidad
         public string CategoriaDescripcion { get; set; }
         public int Stock { get; set; }
         public int StockMinimo { get; set; }
+        public bool EsServicio { get; set; }   // los servicios no manejan inventario
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
         public string Descripcion { get; set; }

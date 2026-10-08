@@ -52,7 +52,7 @@ namespace Belisa
 
             grid = Tabla.Crear();
             Tabla.Columna(grid, "Codigo", "Código", 70);
-            Tabla.Columna(grid, "Producto", "Producto", 180);
+            Tabla.Columna(grid, "Producto", "Producto o servicio", 180);
             Tabla.ColumnaFija(grid, "Cantidad", "Cantidad", 90, null, true);
             Tabla.ColumnaFija(grid, "Precio", "Precio", 100, "C2", true);
             Tabla.ColumnaFija(grid, "Subtotal", "Subtotal", 110, "C2", true);
@@ -108,7 +108,7 @@ namespace Belisa
 
             tarjeta.Controls.AddRange(new Control[]
             {
-                Estilo.Etiqueta("Producto (código o nombre)", 20, 12), buscador,
+                Estilo.Etiqueta("Producto o servicio (código o nombre)", 20, 12), buscador,
                 Estilo.Etiqueta("Cantidad", 305, 12), numCantidad,
                 btnAgregar, lblInfo
             });
@@ -283,7 +283,7 @@ namespace Belisa
             cmbCliente.SelectedIndex = 0;
 
             buscador.Cargar(productos);
-            if (productos.Count == 0) Aviso("Primero registra productos activos.");
+            if (productos.Count == 0) Aviso("Primero registra productos o servicios activos.");
         }
 
         // Tras un rechazo del servidor: trae existencias y precios vigentes y ajusta el carrito
@@ -320,6 +320,14 @@ namespace Belisa
             var p = buscador.Seleccionado();
             if (p == null) { lblInfo.Text = ""; return; }
 
+            // Un servicio no tiene inventario: no se muestra stock ni aviso de agotado
+            if (p.EsServicio)
+            {
+                lblInfo.ForeColor = Estilo.Texto;
+                lblInfo.Text = "Servicio   ·   Precio: " + p.PrecioVenta.ToString("C2");
+                return;
+            }
+
             if (p.Stock <= 0)
             {
                 lblInfo.ForeColor = Estilo.Error;
@@ -339,7 +347,7 @@ namespace Belisa
             var p = buscador.Seleccionado();
             if (p == null)
             {
-                Aviso("Elige un producto de la lista (escribe su código o nombre).");
+                Aviso("Elige un producto o servicio de la lista (escribe su código o nombre).");
                 buscador.Focus();
                 return;
             }
@@ -348,16 +356,28 @@ namespace Belisa
             var existente = carrito.FirstOrDefault(d => d.IdProducto == p.IdProducto);
             int enCarrito = existente == null ? 0 : existente.Cantidad;
 
-            if (p.Stock <= 0)
+            if (p.EsServicio)
             {
-                Aviso(p.Nombre + " no tiene stock.");
-                return;
+                // Los servicios no se agotan: solo se cuida un tope razonable
+                if (enCarrito + cantidad > CantidadMaxima)
+                {
+                    Aviso("La cantidad máxima es " + CantidadMaxima.ToString("N0") + ".");
+                    return;
+                }
             }
-            if (enCarrito + cantidad > p.Stock)
+            else
             {
-                Aviso("Solo hay " + p.Stock + " en existencia"
-                      + (enCarrito > 0 ? " (ya tienes " + enCarrito + " en la venta)." : "."));
-                return;
+                if (p.Stock <= 0)
+                {
+                    Aviso(p.Nombre + " no tiene stock.");
+                    return;
+                }
+                if (enCarrito + cantidad > p.Stock)
+                {
+                    Aviso("Solo hay " + p.Stock + " en existencia"
+                          + (enCarrito > 0 ? " (ya tienes " + enCarrito + " en la venta)." : "."));
+                    return;
+                }
             }
 
             if (existente == null)
@@ -463,7 +483,7 @@ namespace Belisa
 
             if (carrito.Count == 0)
             {
-                Aviso("Agrega al menos un producto.");
+                Aviso("Agrega al menos un producto o servicio.");
                 buscador.Focus();
                 return;
             }

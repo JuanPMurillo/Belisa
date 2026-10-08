@@ -12,6 +12,8 @@ namespace Belisa
     [DesignerCategory("Code")]
     public class FrmProducto : Form
     {
+        private const int Maximo = 1000000;
+
         private readonly ProductoN negocio = new ProductoN();
         private readonly CategoriaN negocioCat = new CategoriaN();
         private readonly ToolTip ayuda = new ToolTip();
@@ -23,10 +25,10 @@ namespace Belisa
 
         private DataGridView grid;
         private TextBox txtBuscar, txtNombre, txtDescripcion;
-        private CheckBox chkStockBajo, chkActivo;
+        private CheckBox chkStockBajo, chkActivo, chkServicio;
         private ComboBox cmbCategoria;
         private NumericUpDown numCompra, numVenta, numStock, numStockMin;
-        private Label lblTitulo, lblMensaje, lblResumen, lblStock;
+        private Label lblTitulo, lblMensaje, lblResumen, lblCompra, lblStock, lblStockMin;
         private Button btnGuardar, btnNuevo;
 
         public FrmProducto()
@@ -80,6 +82,7 @@ namespace Belisa
             grid.Columns["Nombre"].FillWeight = 160;
             grid.Columns.Add("Categoria", "Categoría");
             grid.Columns["Categoria"].FillWeight = 100;
+            AgregarColumnaFija("Tipo", "Tipo", 90, null);
             AgregarColumnaFija("Stock", "Stock", 70, null);
             AgregarColumnaFija("Compra", "P. compra", 100, "C2");
             AgregarColumnaFija("Venta", "P. venta", 100, "C2");
@@ -102,7 +105,7 @@ namespace Belisa
                 ForeColor = Estilo.Texto
             };
             barra.Controls.Add(lblResumen);
-            barra.Controls.Add(Exportar.BotonExcel(grid, "Productos"));
+            barra.Controls.Add(Exportar.BotonExcel(grid, "Productos y servicios"));
             barra.Controls.Add(Estilo.Etiqueta("Buscar", 0, 16));
 
             txtBuscar = Estilo.Campo(70, 12, 280);
@@ -132,7 +135,8 @@ namespace Belisa
             col.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             col.Width = ancho;
             if (formato != null) col.DefaultCellStyle.Format = formato;
-            if (nombre != "Estado") col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            if (nombre != "Estado" && nombre != "Tipo")
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
 
         private static NumericUpDown Num(int x, int y, int ancho, int decimales, decimal max)
@@ -156,18 +160,30 @@ namespace Belisa
 
             lblTitulo = new Label
             {
-                Location = new Point(28, 18),
+                Location = new Point(28, 14),
                 AutoSize = true,
                 Font = new Font("Segoe UI", 14f, FontStyle.Bold),
                 ForeColor = Estilo.Texto
             };
 
-            txtNombre = Estilo.Campo(28, 86, 344);
+            chkServicio = new CheckBox
+            {
+                Text = "Es un servicio (no maneja inventario)",
+                Location = new Point(28, 54),
+                AutoSize = true,
+                Font = Estilo.Normal,
+                ForeColor = Estilo.Texto
+            };
+            ayuda.SetToolTip(chkServicio,
+                "Los servicios (por ejemplo, una depilación) no tienen stock, no se compran ni se ajustan.\n" +
+                "El tipo se elige al crear y ya no se puede cambiar.");
+
+            txtNombre = Estilo.Campo(28, 112, 344);
             txtNombre.MaxLength = 100;
 
             cmbCategoria = new ComboBox
             {
-                Location = new Point(28, 152),
+                Location = new Point(28, 178),
                 Width = 344,
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = Estilo.Normal,
@@ -175,18 +191,19 @@ namespace Belisa
                 ValueMember = "IdCategoria"
             };
 
-            numCompra = Num(28, 218, 164, 2, 99999999.99m);
-            numVenta = Num(212, 218, 160, 2, 99999999.99m);
-            numStock = Num(28, 284, 164, 0, 1000000);
-            numStockMin = Num(212, 284, 160, 0, 1000000);
+            numCompra = Num(28, 244, 164, 2, 99999999.99m);
+            numVenta = Num(212, 244, 160, 2, 99999999.99m);
+            numStock = Num(28, 310, 164, 0, Maximo);
+            numStockMin = Num(212, 310, 160, 0, Maximo);
 
-            lblStock = Estilo.Etiqueta("Stock inicial", 28, 260);
-            var lblStockMin = Estilo.Etiqueta("Stock mínimo", 212, 260);
+            lblCompra = Estilo.Etiqueta("Precio de compra", 28, 220);
+            lblStock = Estilo.Etiqueta("Stock inicial", 28, 286);
+            lblStockMin = Estilo.Etiqueta("Stock mínimo", 212, 286);
             ayuda.SetToolTip(lblStock, "El stock solo se captura al crear el producto.\nDespués cambia con las compras y las ventas.");
             ayuda.SetToolTip(lblStockMin, "Cuando el stock llegue a este número, el producto se marca como stock bajo.");
             ayuda.SetToolTip(numStockMin, "Cuando el stock llegue a este número, el producto se marca como stock bajo.");
 
-            txtDescripcion = Estilo.Campo(28, 350, 344);
+            txtDescripcion = Estilo.Campo(28, 376, 344);
             txtDescripcion.MaxLength = 200;
             txtDescripcion.KeyDown += (s, e) =>
             {
@@ -195,8 +212,8 @@ namespace Belisa
 
             chkActivo = new CheckBox
             {
-                Text = "Producto activo",
-                Location = new Point(28, 392),
+                Text = "Activo",
+                Location = new Point(28, 418),
                 AutoSize = true,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
@@ -204,31 +221,34 @@ namespace Belisa
 
             lblMensaje = new Label
             {
-                Location = new Point(28, 422),
+                Location = new Point(28, 448),
                 Size = new Size(344, 40),
                 Font = Estilo.Normal
             };
 
-            btnGuardar = Estilo.Boton("Guardar", 28, 470, 210, 42, true);
+            btnGuardar = Estilo.Boton("Guardar", 28, 496, 210, 42, true);
             btnGuardar.Click += (s, e) => Guardar();
 
-            btnNuevo = Estilo.Boton("Nuevo", 250, 470, 122, 42, false);
+            btnNuevo = Estilo.Boton("Nuevo", 250, 496, 122, 42, false);
             btnNuevo.Click += (s, e) => Nuevo();
 
             panel.Controls.AddRange(new Control[]
             {
-                lblTitulo,
-                Estilo.Etiqueta("Nombre", 28, 62), txtNombre,
-                Estilo.Etiqueta("Categoría", 28, 128), cmbCategoria,
-                Estilo.Etiqueta("Precio de compra", 28, 194), numCompra,
-                Estilo.Etiqueta("Precio de venta", 212, 194), numVenta,
+                lblTitulo, chkServicio,
+                Estilo.Etiqueta("Nombre", 28, 88), txtNombre,
+                Estilo.Etiqueta("Categoría", 28, 154), cmbCategoria,
+                lblCompra, numCompra,
+                Estilo.Etiqueta("Precio de venta", 212, 220), numVenta,
                 lblStock, numStock, lblStockMin, numStockMin,
-                Estilo.Etiqueta("Descripción (opcional)", 28, 326), txtDescripcion,
+                Estilo.Etiqueta("Descripción (opcional)", 28, 352), txtDescripcion,
                 chkActivo, lblMensaje, btnGuardar, btnNuevo,
                 new Panel { Dock = DockStyle.Left, Width = 1, BackColor = Estilo.LilaClaro }
             });
 
             Controls.Add(panel);
+
+            // Se conecta al final, cuando ya existen todos los controles
+            chkServicio.CheckedChanged += (s, e) => ActualizarTipo();
         }
 
         // ---------- Datos ----------
@@ -249,9 +269,10 @@ namespace Belisa
             Refrescar();
         }
 
+        // Los servicios no manejan inventario: nunca cuentan como stock bajo
         private static bool StockBajo(Producto p)
         {
-            return p.Estado && p.Stock <= p.StockMinimo;
+            return p.Estado && !p.EsServicio && p.Stock <= p.StockMinimo;
         }
 
         // Redibuja la tabla aplicando búsqueda y filtro de stock bajo
@@ -265,17 +286,20 @@ namespace Belisa
                 (filtro.Length == 0
                     || x.Codigo.ToLower().Contains(filtro)
                     || x.Nombre.ToLower().Contains(filtro)
-                    || (x.CategoriaDescripcion ?? "").ToLower().Contains(filtro))
+                    || (x.CategoriaDescripcion ?? "").ToLower().Contains(filtro)
+                    || (x.EsServicio ? "servicio" : "producto").Contains(filtro))
                 && (!chkStockBajo.Checked || StockBajo(x))).ToList();
 
-            lblResumen.Text = vista.Count + " de " + productos.Count + " productos  ·  "
+            lblResumen.Text = vista.Count + " de " + productos.Count + " registros  ·  "
                               + productos.Count(StockBajo) + " con stock bajo";
 
             grid.Rows.Clear();
             foreach (var p in vista)
             {
                 int i = grid.Rows.Add(p.IdProducto, p.Codigo, p.Nombre, p.CategoriaDescripcion,
-                                      p.Stock, p.PrecioCompra, p.PrecioVenta,
+                                      p.EsServicio ? "Servicio" : "Producto",
+                                      p.EsServicio ? (object)"—" : p.Stock,
+                                      p.PrecioCompra, p.PrecioVenta,
                                       p.Estado ? "Activo" : "Inactivo");
                 var fila = grid.Rows[i];
                 fila.Tag = p;
@@ -284,12 +308,12 @@ namespace Belisa
                 {
                     fila.DefaultCellStyle.ForeColor = Color.Gray;
                 }
-                else if (p.Stock <= 0)
+                else if (!p.EsServicio && p.Stock <= 0)
                 {
                     fila.Cells["Stock"].Style.ForeColor = Estilo.Error;
                     fila.Cells["Stock"].Style.Font = Estilo.Negrita;
                 }
-                else if (p.Stock <= p.StockMinimo)
+                else if (!p.EsServicio && p.Stock <= p.StockMinimo)
                 {
                     fila.Cells["Stock"].Style.ForeColor = Color.FromArgb(176, 110, 10);
                     fila.Cells["Stock"].Style.Font = Estilo.Negrita;
@@ -322,28 +346,53 @@ namespace Belisa
                 .ToList();
         }
 
+        // Un servicio no tiene stock: se ocultan esos campos y el precio de compra pasa a ser un costo estimado
+        private void ActualizarTipo()
+        {
+            bool servicio = chkServicio.Checked;
+
+            lblStock.Visible = !servicio;
+            numStock.Visible = !servicio;
+            lblStockMin.Visible = !servicio;
+            numStockMin.Visible = !servicio;
+
+            lblCompra.Text = servicio ? "Costo estimado (opcional)" : "Precio de compra";
+
+            if (seleccion == null)
+                lblTitulo.Text = servicio ? "Nuevo servicio" : "Nuevo producto";
+        }
+
         private void Mostrar(Producto p)
         {
             seleccion = p;
-            lblTitulo.Text = "Editar producto";
+
+            chkServicio.Checked = p.EsServicio;
+            chkServicio.Enabled = false;          // el tipo no se cambia después de crear
+            lblTitulo.Text = p.EsServicio ? "Editar servicio" : "Editar producto";
+
             txtNombre.Text = p.Nombre;
             LlenarCategorias(p.IdCategoria);
             cmbCategoria.SelectedValue = p.IdCategoria;
             numCompra.Value = p.PrecioCompra;
             numVenta.Value = p.PrecioVenta;
             lblStock.Text = "Stock actual";
-            numStock.Value = p.Stock;
-            numStock.Enabled = false;          // el stock no se edita a mano
-            numStockMin.Value = p.StockMinimo;
+            numStock.Value = Math.Min(p.Stock, Maximo);
+            numStock.Enabled = false;             // el stock no se edita a mano
+            numStockMin.Value = Math.Min(p.StockMinimo, Maximo);
             txtDescripcion.Text = p.Descripcion;
             chkActivo.Checked = p.Estado;
             lblMensaje.Text = "";
+
+            ActualizarTipo();
         }
 
         private void Nuevo()
         {
             seleccion = null;
-            lblTitulo.Text = "Nuevo producto";
+
+            chkServicio.Checked = false;
+            chkServicio.Enabled = true;
+
             txtNombre.Clear();
             LlenarCategorias(null);
             cmbCategoria.SelectedIndex = -1;
@@ -362,6 +411,7 @@ namespace Belisa
             grid.ClearSelection();
             cargando = false;
 
+            ActualizarTipo();
             txtNombre.Focus();
         }
 
@@ -369,14 +419,16 @@ namespace Belisa
         {
             lblMensaje.Text = "";
             bool esNuevo = seleccion == null;
+            bool servicio = chkServicio.Checked;
 
             var p = new Producto
             {
                 IdProducto = esNuevo ? 0 : seleccion.IdProducto,
                 Nombre = txtNombre.Text,
                 IdCategoria = cmbCategoria.SelectedValue == null ? 0 : (int)cmbCategoria.SelectedValue,
-                Stock = (int)numStock.Value,
-                StockMinimo = (int)numStockMin.Value,
+                EsServicio = servicio,
+                Stock = servicio ? 0 : (int)numStock.Value,
+                StockMinimo = servicio ? 0 : (int)numStockMin.Value,
                 PrecioCompra = numCompra.Value,
                 PrecioVenta = numVenta.Value,
                 Descripcion = txtDescripcion.Text,
@@ -384,7 +436,9 @@ namespace Belisa
             };
 
             if (p.PrecioVenta > 0 && p.PrecioVenta < p.PrecioCompra &&
-                MessageBox.Show("El precio de venta es menor al de compra.\n¿Guardar de todos modos?",
+                MessageBox.Show(servicio
+                        ? "El precio de venta es menor al costo estimado.\n¿Guardar de todos modos?"
+                        : "El precio de venta es menor al de compra.\n¿Guardar de todos modos?",
                     "Precio", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
 
@@ -398,7 +452,7 @@ namespace Belisa
                     return;
                 }
 
-                seleccion = new Producto { IdProducto = p.IdProducto };   // para que se quede marcado
+                seleccion = new Producto { IdProducto = p.IdProducto, EsServicio = servicio };   // para que se quede marcado
                 Cargar();
 
                 var guardado = productos.FirstOrDefault(x => x.IdProducto == p.IdProducto);

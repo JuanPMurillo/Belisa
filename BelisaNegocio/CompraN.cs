@@ -26,7 +26,7 @@ namespace BelisaNegocio
         public List<Producto> ListarProductosActivos()
         {
             Sesion.ExigirPermiso("menucompras");
-            return productoD.Listar().Where(p => p.Estado).ToList();
+            return productoD.Listar().Where(p => p.Estado && !p.EsServicio).ToList();
         }
 
         public bool Registrar(Compra c, out string mensaje)

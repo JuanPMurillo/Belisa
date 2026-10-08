@@ -32,7 +32,8 @@ namespace BelisaDatos
                             PrecioCompra = Convert.ToDecimal(rdr["PrecioCompra"]),
                             PrecioVenta = Convert.ToDecimal(rdr["PrecioVenta"]),
                             Descripcion = rdr["Descripcion"] == DBNull.Value ? "" : Convert.ToString(rdr["Descripcion"]),
-                            Estado = Convert.ToBoolean(rdr["Estado"])
+                            Estado = Convert.ToBoolean(rdr["Estado"]),
+                            EsServicio = Convert.ToBoolean(rdr["EsServicio"])
                         });
                     }
                 }
@@ -56,6 +57,7 @@ namespace BelisaDatos
                 cmd.Parameters.Add(Dinero("@PrecioVenta", p.PrecioVenta));
                 cmd.Parameters.Add("@Descripcion", SqlDbType.VarChar, 200).Value = Ayuda.ANullable(p.Descripcion);
                 cmd.Parameters.Add("@Estado", SqlDbType.Bit).Value = p.Estado;
+                cmd.Parameters.Add("@EsServicio", SqlDbType.Bit).Value = p.EsServicio;
 
                 var pId = cmd.Parameters.Add("@IdGenerado", SqlDbType.Int);
                 pId.Direction = ParameterDirection.Output;
