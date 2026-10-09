@@ -2,7 +2,7 @@
 
 **Belisa** es una aplicación de escritorio desarrollada en C# y .NET, diseñada para apoyar la administración de un negocio mediante la gestión de inventario, compras y proveedores.
 
-El proyecto nació de una necesidad real: desarrollar una herramienta adaptada a las operaciones de un negocio familiar. Su desarrollo me permitió aplicar conocimientos de programación orientada a objetos, bases de datos relacionales, arquitectura en capas y desarrollo de interfaces de escritorio.
+El proyecto nació de una necesidad real: desarrollar una herramienta adaptada a las operaciones de un negocio. Su desarrollo me permitió aplicar conocimientos de programación orientada a objetos, bases de datos relacionales, arquitectura en capas y desarrollo de interfaces de escritorio.
 
 ## ✨ Características principales
 
