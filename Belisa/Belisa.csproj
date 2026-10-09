@@ -147,6 +147,7 @@
     </Compile>
     <Compile Include="FrmCliente.cs" />
     <Compile Include="FrmCompra.cs" />
+    <Compile Include="FrmConexion.cs" />
     <Compile Include="FrmContactoBase.cs" />
     <Compile Include="FrmDetalleCompra.cs" />
     <Compile Include="FrmDetalleVenta.cs" />
