@@ -183,11 +183,30 @@ namespace Belisa
             }
             L.Add(P("TOTAL", v.MontoTotal.ToString("C2"), t + 3, true));
 
-            L.Add(P("Pago", v.MetodoPago, t, false));
-            if (!string.IsNullOrEmpty(v.ReferenciaPago)) L.Add(T("Ref: " + v.ReferenciaPago, t, false));
-            if (v.MetodoPago == "Efectivo")
+            if (v.Pagos != null && v.Pagos.Count > 0)
             {
-                L.Add(P("Recibido", v.MontoPago.ToString("C2"), t, false));
+                // Una línea por forma de pago: una si fue normal, dos si fue mixta
+                foreach (var pago in v.Pagos)
+                {
+                    L.Add(P("Pago " + pago.MetodoPago, pago.Monto.ToString("C2"), t, false));
+                    if (!string.IsNullOrEmpty(pago.ReferenciaPago)) L.Add(T("Ref: " + pago.ReferenciaPago, t, false));
+                }
+            }
+            else
+            {
+                L.Add(P("Pago", v.MetodoPago, t, false));
+                if (!string.IsNullOrEmpty(v.ReferenciaPago)) L.Add(T("Ref: " + v.ReferenciaPago, t, false));
+            }
+
+            // Efectivo recibido = lo que se cobró en efectivo + el cambio
+            bool hayEfectivo = v.MetodoPago == "Efectivo"
+                               || (v.Pagos != null && v.Pagos.Any(x => x.MetodoPago == "Efectivo"));
+            if (hayEfectivo)
+            {
+                decimal efectivoParte = (v.Pagos != null && v.Pagos.Count > 0)
+                    ? v.Pagos.Where(x => x.MetodoPago == "Efectivo").Sum(x => x.Monto)
+                    : v.MontoTotal;
+                L.Add(P("Efectivo recibido", (efectivoParte + v.MontoCambio).ToString("C2"), t, false));
                 L.Add(P("Cambio", v.MontoCambio.ToString("C2"), t, false));
             }
             L.Add(S());

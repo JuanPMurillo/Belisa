@@ -11,7 +11,8 @@ namespace Belisa
     {
         private readonly ClienteN negocio = new ClienteN();
 
-        public FrmCliente() : base("cliente", "Nombre completo") { }
+        // El tercer dato (true) activa el cumpleaños opcional: los proveedores no lo usan
+        public FrmCliente() : base("cliente", "Nombre completo", true) { }
 
         protected override List<Contacto> ListarContactos()
         {
@@ -22,7 +23,9 @@ namespace Belisa
                 Nombre = c.NombreCompleto,
                 Correo = c.Correo,
                 Telefono = c.Telefono,
-                Estado = c.Estado
+                Estado = c.Estado,
+                CumpleDia = c.CumpleDia,
+                CumpleMes = c.CumpleMes
             }).ToList();
         }
 
@@ -35,7 +38,9 @@ namespace Belisa
                 NombreCompleto = c.Nombre,
                 Correo = c.Correo,
                 Telefono = c.Telefono,
-                Estado = c.Estado
+                Estado = c.Estado,
+                CumpleDia = c.CumpleDia,
+                CumpleMes = c.CumpleMes
             };
 
             bool ok = negocio.Guardar(cliente, out mensaje);

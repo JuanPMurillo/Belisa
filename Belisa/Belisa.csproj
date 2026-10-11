@@ -155,6 +155,7 @@
     <Compile Include="FrmDetalleCompra.cs" />
     <Compile Include="FrmDetalleVenta.cs" />
     <Compile Include="FrmMotivo.cs" />
+    <Compile Include="FrmPagoMixto.cs" />
     <Compile Include="FrmPendiente.cs">
       <SubType>Form</SubType>
     </Compile>

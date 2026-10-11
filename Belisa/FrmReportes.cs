@@ -158,7 +158,7 @@ namespace Belisa
         {
             gridMetodo = Tabla.Crear();
             Tabla.Columna(gridMetodo, "Metodo", "Método de pago", 100);
-            Tabla.ColumnaFija(gridMetodo, "Ventas", "Ventas", 80, null, true);
+            Tabla.ColumnaFija(gridMetodo, "Ventas", "Cobros", 80, null, true);
             Tabla.ColumnaFija(gridMetodo, "Total", "Total", 130, "C2", true);
             Compactar(gridMetodo);
 

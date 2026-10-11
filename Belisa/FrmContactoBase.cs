@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using BelisaNegocio;
 
 namespace Belisa
 {
@@ -16,6 +17,8 @@ namespace Belisa
         public string Correo { get; set; }
         public string Telefono { get; set; }
         public bool Estado { get; set; }
+        public int? CumpleDia { get; set; }     // solo se usa en clientes
+        public int? CumpleMes { get; set; }
     }
 
     [DesignerCategory("Code")]   // evita que Visual Studio intente abrirla en el diseñador
@@ -23,6 +26,7 @@ namespace Belisa
     {
         private readonly string singular;          // "cliente"
         private readonly string etiquetaNombre;    // "Nombre completo"
+        private readonly bool conCumpleanos;       // solo los clientes guardan su cumpleaños
 
         private List<Contacto> contactos = new List<Contacto>();
         private Contacto seleccion;                // null = se está creando uno nuevo
@@ -30,7 +34,8 @@ namespace Belisa
 
         private DataGridView grid;
         private TextBox txtBuscar, txtNombre, txtTelefono, txtCorreo;
-        private CheckBox chkActivo;
+        private ComboBox cmbCumpleDia, cmbCumpleMes;
+        private CheckBox chkActivo, chkCumpleMes;
         private Label lblTitulo, lblMensaje, lblResumen;
         private Button btnGuardar, btnNuevo;
 
@@ -39,9 +44,15 @@ namespace Belisa
         protected abstract bool GuardarContacto(Contacto c, out string mensaje);
 
         protected FrmContactoBase(string singular, string etiquetaNombre)
+            : this(singular, etiquetaNombre, false)
+        {
+        }
+
+        protected FrmContactoBase(string singular, string etiquetaNombre, bool conCumpleanos)
         {
             this.singular = singular;
             this.etiquetaNombre = etiquetaNombre;
+            this.conCumpleanos = conCumpleanos;
 
             BackColor = Estilo.Fondo;
             ConstruirLista();        // primero el panel central (Fill)...
@@ -94,6 +105,11 @@ namespace Belisa
             grid.Columns["Telefono"].FillWeight = 80;
             grid.Columns.Add("Correo", "Correo");
             grid.Columns["Correo"].FillWeight = 120;
+            if (conCumpleanos)
+            {
+                grid.Columns.Add("Cumple", "Cumpleaños");
+                grid.Columns["Cumple"].FillWeight = 80;
+            }
             grid.Columns.Add("Estado", "Estado");
             grid.Columns["Estado"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             grid.Columns["Estado"].Width = 90;
@@ -122,13 +138,45 @@ namespace Belisa
             txtBuscar.TextChanged += (s, e) => Refrescar();
             barra.Controls.Add(txtBuscar);
 
+            if (conCumpleanos)
+            {
+                chkCumpleMes = new CheckBox
+                {
+                    Text = "Cumpleaños este mes",
+                    Location = new Point(388, 15),
+                    AutoSize = true,
+                    Font = Estilo.Normal,
+                    ForeColor = Estilo.Texto
+                };
+                chkCumpleMes.CheckedChanged += (s, e) => Refrescar();
+                barra.Controls.Add(chkCumpleMes);
+            }
+
             panel.Controls.Add(grid);
             panel.Controls.Add(barra);
             Controls.Add(panel);
         }
 
+        private static ComboBox NuevoCombo(int x, int y, int ancho, string primero, IEnumerable<string> opciones)
+        {
+            var combo = new ComboBox
+            {
+                Location = new Point(x, y),
+                Width = ancho,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = Estilo.Normal
+            };
+            combo.Items.Add(primero);   // la posición 0 significa «sin dato»
+            foreach (string opcion in opciones) combo.Items.Add(opcion);
+            combo.SelectedIndex = 0;
+            return combo;
+        }
+
         private void ConstruirFormulario()
         {
+            // El cumpleaños ocupa una fila más: lo que va debajo se recorre hacia abajo
+            int extra = conCumpleanos ? 66 : 0;
+
             var panel = new Panel { Dock = DockStyle.Right, Width = 360, BackColor = Color.White, AutoScroll = true };
 
             lblTitulo = new Label
@@ -146,18 +194,27 @@ namespace Belisa
             txtCorreo = Estilo.Campo(28, 228, 304);
             txtCorreo.MaxLength = 100;
 
+            if (conCumpleanos)
+            {
+                cmbCumpleDia = NuevoCombo(28, 294, 90, "—", Enumerable.Range(1, 31).Select(n => n.ToString()));
+                cmbCumpleMes = NuevoCombo(128, 294, 204, "—",
+                    CumpleanosN.Meses.Select(m => char.ToUpper(m[0]).ToString() + m.Substring(1)));
+            }
+
             // Enter pasa al siguiente campo; en el último, guarda
             EnterPasaA(txtNombre, txtTelefono);
             EnterPasaA(txtTelefono, txtCorreo);
             txtCorreo.KeyDown += (s, e) =>
             {
-                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; Guardar(); }
+                if (e.KeyCode != Keys.Enter) return;
+                e.SuppressKeyPress = true;
+                if (conCumpleanos) cmbCumpleDia.Focus(); else Guardar();
             };
 
             chkActivo = new CheckBox
             {
                 Text = "Activo",
-                Location = new Point(28, 274),
+                Location = new Point(28, 274 + extra),
                 AutoSize = true,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
@@ -165,27 +222,37 @@ namespace Belisa
 
             lblMensaje = new Label
             {
-                Location = new Point(28, 306),
+                Location = new Point(28, 306 + extra),
                 Size = new Size(304, 44),
                 Font = Estilo.Normal
             };
 
-            btnGuardar = Estilo.Boton("Guardar", 28, 358, 304, 42, true);
+            btnGuardar = Estilo.Boton("Guardar", 28, 358 + extra, 304, 42, true);
             btnGuardar.Click += (s, e) => Guardar();
 
-            btnNuevo = Estilo.Boton("Nuevo " + singular, 28, 410, 304, 36, false);
+            btnNuevo = Estilo.Boton("Nuevo " + singular, 28, 410 + extra, 304, 36, false);
             btnNuevo.Click += (s, e) => Nuevo();
 
-            panel.Controls.AddRange(new Control[]
+            var controles = new List<Control>
             {
                 lblTitulo,
                 Estilo.Etiqueta(etiquetaNombre, 28, 70), txtNombre,
                 Estilo.Etiqueta("Teléfono (opcional)", 28, 136), txtTelefono,
-                Estilo.Etiqueta("Correo (opcional)", 28, 202), txtCorreo,
-                chkActivo, lblMensaje, btnGuardar, btnNuevo,
-                new Panel { Dock = DockStyle.Left, Width = 1, BackColor = Estilo.LilaClaro }
-            });
+                Estilo.Etiqueta("Correo (opcional)", 28, 202), txtCorreo
+            };
+            if (conCumpleanos)
+            {
+                controles.Add(Estilo.Etiqueta("Cumpleaños (opcional)", 28, 268));
+                controles.Add(cmbCumpleDia);
+                controles.Add(cmbCumpleMes);
+            }
+            controles.Add(chkActivo);
+            controles.Add(lblMensaje);
+            controles.Add(btnGuardar);
+            controles.Add(btnNuevo);
+            controles.Add(new Panel { Dock = DockStyle.Left, Width = 1, BackColor = Estilo.LilaClaro });
 
+            panel.Controls.AddRange(controles.ToArray());
             Controls.Add(panel);
         }
 
@@ -224,22 +291,45 @@ namespace Belisa
             cargando = true;
             string filtro = txtBuscar.Text.Trim().ToLower();
             int? idActual = seleccion == null ? (int?)null : seleccion.Id;
+            bool soloEsteMes = conCumpleanos && chkCumpleMes != null && chkCumpleMes.Checked;
 
-            var vista = contactos.Where(x => filtro.Length == 0
-                || Minusculas(x.Documento).Contains(filtro)
-                || Minusculas(x.Nombre).Contains(filtro)
-                || Minusculas(x.Telefono).Contains(filtro)
-                || Minusculas(x.Correo).Contains(filtro)).ToList();
+            var vista = contactos.Where(x =>
+                (filtro.Length == 0
+                    || Minusculas(x.Documento).Contains(filtro)
+                    || Minusculas(x.Nombre).Contains(filtro)
+                    || Minusculas(x.Telefono).Contains(filtro)
+                    || Minusculas(x.Correo).Contains(filtro)
+                    || (conCumpleanos && Minusculas(CumpleanosN.Texto(x.CumpleDia, x.CumpleMes)).Contains(filtro)))
+                && (!soloEsteMes || CumpleanosN.EsEsteMes(x.CumpleMes))).ToList();
+
+            // Con el filtro del mes, las más próximas van primero
+            if (soloEsteMes)
+                vista = vista.OrderBy(x => x.CumpleDia ?? 99).ThenBy(x => x.Nombre).ToList();
 
             lblResumen.Text = vista.Count + " de " + contactos.Count + " registrados";
 
             grid.Rows.Clear();
             foreach (var c in vista)
             {
-                int i = grid.Rows.Add(c.Id, c.Documento, c.Nombre, c.Telefono, c.Correo,
-                                      c.Estado ? "Activo" : "Inactivo");
-                grid.Rows[i].Tag = c;
-                if (!c.Estado) grid.Rows[i].DefaultCellStyle.ForeColor = Color.Gray;
+                object[] valores = conCumpleanos
+                    ? new object[] { c.Id, c.Documento, c.Nombre, c.Telefono, c.Correo,
+                                     CumpleanosN.Texto(c.CumpleDia, c.CumpleMes),
+                                     c.Estado ? "Activo" : "Inactivo" }
+                    : new object[] { c.Id, c.Documento, c.Nombre, c.Telefono, c.Correo,
+                                     c.Estado ? "Activo" : "Inactivo" };
+
+                int i = grid.Rows.Add(valores);
+                var fila = grid.Rows[i];
+                fila.Tag = c;
+
+                if (!c.Estado) fila.DefaultCellStyle.ForeColor = Color.Gray;
+
+                // Quien cumple años hoy se resalta para no dejar pasar la promoción
+                if (conCumpleanos && CumpleanosN.EsHoy(c.CumpleDia, c.CumpleMes))
+                {
+                    fila.Cells["Cumple"].Style.Font = Estilo.Negrita;
+                    fila.Cells["Cumple"].Style.ForeColor = Estilo.Acento;
+                }
             }
 
             grid.ClearSelection();
@@ -267,6 +357,11 @@ namespace Belisa
             txtNombre.Text = c.Nombre;
             txtTelefono.Text = c.Telefono;
             txtCorreo.Text = c.Correo;
+            if (conCumpleanos)
+            {
+                cmbCumpleDia.SelectedIndex = c.CumpleDia ?? 0;
+                cmbCumpleMes.SelectedIndex = c.CumpleMes ?? 0;
+            }
             chkActivo.Checked = c.Estado;
             lblMensaje.Text = "";
         }
@@ -278,6 +373,11 @@ namespace Belisa
             txtNombre.Clear();
             txtTelefono.Clear();
             txtCorreo.Clear();
+            if (conCumpleanos)
+            {
+                cmbCumpleDia.SelectedIndex = 0;
+                cmbCumpleMes.SelectedIndex = 0;
+            }
             chkActivo.Checked = true;
             lblMensaje.Text = "";
 
@@ -301,7 +401,9 @@ namespace Belisa
                 Nombre = txtNombre.Text,
                 Telefono = txtTelefono.Text,
                 Correo = txtCorreo.Text,
-                Estado = chkActivo.Checked
+                Estado = chkActivo.Checked,
+                CumpleDia = conCumpleanos && cmbCumpleDia.SelectedIndex > 0 ? (int?)cmbCumpleDia.SelectedIndex : null,
+                CumpleMes = conCumpleanos && cmbCumpleMes.SelectedIndex > 0 ? (int?)cmbCumpleMes.SelectedIndex : null
             };
 
             try

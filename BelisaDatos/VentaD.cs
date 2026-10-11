@@ -26,14 +26,24 @@ namespace BelisaDatos
                 cmd.Parameters.Add("@IdUsuario", SqlDbType.Int).Value = v.IdUsuario;
                 cmd.Parameters.Add("@IdCliente", SqlDbType.Int).Value =
                     v.IdCliente.HasValue ? (object)v.IdCliente.Value : DBNull.Value;
-                cmd.Parameters.Add("@MetodoPago", SqlDbType.VarChar, 30).Value = v.MetodoPago;
-                cmd.Parameters.Add("@ReferenciaPago", SqlDbType.VarChar, 50).Value = Ayuda.ANullable(v.ReferenciaPago);
                 cmd.Parameters.Add(ParametroDecimal("@DescuentoPorcentaje", v.DescuentoPorcentaje, 5, 2));
                 cmd.Parameters.Add(ParametroDecimal("@MontoPago", v.MontoPago, 10, 2));
 
                 var pDetalle = cmd.Parameters.Add("@Detalle", SqlDbType.Structured);
                 pDetalle.TypeName = "dbo.EDetalle_Venta";
                 pDetalle.Value = tabla;
+
+                var pagos = new DataTable();
+                pagos.Columns.Add("MetodoPago", typeof(string));
+                pagos.Columns.Add("Monto", typeof(decimal));
+                pagos.Columns.Add("ReferenciaPago", typeof(string));
+                foreach (var p in v.Pagos)
+                    pagos.Rows.Add(p.MetodoPago, p.Monto,
+                                   string.IsNullOrWhiteSpace(p.ReferenciaPago) ? (object)DBNull.Value : p.ReferenciaPago);
+
+                var pPagos = cmd.Parameters.Add("@Pagos", SqlDbType.Structured);
+                pPagos.TypeName = "dbo.EPago_Venta";
+                pPagos.Value = pagos;
 
                 var pId = cmd.Parameters.Add("@IdGenerado", SqlDbType.Int);
                 pId.Direction = ParameterDirection.Output;
@@ -135,7 +145,61 @@ namespace BelisaDatos
             }
             return lista;
         }
+        // Las formas de pago de una venta (una, o dos si fue mixta)
+        public List<PagoVenta> ObtenerPagos(int idVenta, int? idUsuario)
+        {
+            var lista = new List<PagoVenta>();
+            using (var cn = new SqlConnection(Conexion.Cadena))
+            using (var cmd = new SqlCommand("SP_PAGOS_VENTA", cn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdVenta", SqlDbType.Int).Value = idVenta;
+                cmd.Parameters.Add("@IdUsuario", SqlDbType.Int).Value =
+                    idUsuario.HasValue ? (object)idUsuario.Value : DBNull.Value;
+                cn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        lista.Add(new PagoVenta
+                        {
+                            IdVenta = idVenta,
+                            MetodoPago = Convert.ToString(rdr["MetodoPago"]),
+                            Monto = Convert.ToDecimal(rdr["Monto"]),
+                            ReferenciaPago = Ayuda.Texto(rdr["ReferenciaPago"])
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
 
+        // Pagos de las ventas vigentes (no anuladas) de un periodo, para los reportes
+        public List<PagoVenta> ListarPagos(DateTime desde, DateTime hasta)
+        {
+            var lista = new List<PagoVenta>();
+            using (var cn = new SqlConnection(Conexion.Cadena))
+            using (var cmd = new SqlCommand("SP_LISTAR_PAGOS", cn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Desde", SqlDbType.Date).Value = desde.Date;
+                cmd.Parameters.Add("@Hasta", SqlDbType.Date).Value = hasta.Date;
+                cn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        lista.Add(new PagoVenta
+                        {
+                            IdVenta = Convert.ToInt32(rdr["IdVenta"]),
+                            MetodoPago = Convert.ToString(rdr["MetodoPago"]),
+                            Monto = Convert.ToDecimal(rdr["Monto"])
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
         private static SqlParameter ParametroDecimal(string nombre, decimal valor, byte precision, byte escala)
         {
             return new SqlParameter(nombre, SqlDbType.Decimal)

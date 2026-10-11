@@ -27,7 +27,9 @@ namespace BelisaDatos
                             NombreCompleto = Convert.ToString(rdr["NombreCompleto"]),
                             Correo = Ayuda.Texto(rdr["Correo"]),
                             Telefono = Ayuda.Texto(rdr["Telefono"]),
-                            Estado = Convert.ToBoolean(rdr["Estado"])
+                            Estado = Convert.ToBoolean(rdr["Estado"]),
+                            CumpleDia = rdr["CumpleDia"] == DBNull.Value ? (int?)null : Convert.ToInt32(rdr["CumpleDia"]),
+                            CumpleMes = rdr["CumpleMes"] == DBNull.Value ? (int?)null : Convert.ToInt32(rdr["CumpleMes"])
                         });
                     }
                 }
@@ -47,6 +49,10 @@ namespace BelisaDatos
                 cmd.Parameters.Add("@Correo", SqlDbType.VarChar, 100).Value = Ayuda.ANullable(c.Correo);
                 cmd.Parameters.Add("@Telefono", SqlDbType.VarChar, 50).Value = Ayuda.ANullable(c.Telefono);
                 cmd.Parameters.Add("@Estado", SqlDbType.Bit).Value = c.Estado;
+                cmd.Parameters.Add("@CumpleDia", SqlDbType.TinyInt).Value =
+                    c.CumpleDia.HasValue ? (object)(byte)c.CumpleDia.Value : DBNull.Value;
+                cmd.Parameters.Add("@CumpleMes", SqlDbType.TinyInt).Value =
+                    c.CumpleMes.HasValue ? (object)(byte)c.CumpleMes.Value : DBNull.Value;
 
                 var pId = cmd.Parameters.Add("@IdGenerado", SqlDbType.Int);
                 pId.Direction = ParameterDirection.Output;
@@ -60,7 +66,7 @@ namespace BelisaDatos
                 }
                 catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
                 {
-                    // Dos personas guardaron el mismo documento al mismo tiempo
+                    // Dos personas guardaron al mismo tiempo y chocaron con el mismo código
                     mensaje = "No se pudo asignar el código. Intenta de nuevo.";
                     return 0;
                 }

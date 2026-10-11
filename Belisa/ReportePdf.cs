@@ -68,9 +68,23 @@ namespace Belisa
             Dato(s, "Fecha", v.FechaRegistro.ToString("dd/MM/yyyy HH:mm"));
             Dato(s, "Cliente", v.ClienteNombre);
             Dato(s, "Atendió", v.UsuarioNombre);
-            string pago = v.MetodoPago;
-            if (!string.IsNullOrEmpty(v.ReferenciaPago)) pago += "  (ref. " + v.ReferenciaPago + ")";
-            Dato(s, "Método de pago", pago);
+            if (v.Pagos != null && v.Pagos.Count > 1)
+            {
+                // Pago mixto: una línea por cada parte
+                int numero = 1;
+                foreach (var forma in v.Pagos)
+                {
+                    string linea = forma.MetodoPago + ": " + forma.Monto.ToString("C2");
+                    if (!string.IsNullOrEmpty(forma.ReferenciaPago)) linea += "  (ref. " + forma.ReferenciaPago + ")";
+                    Dato(s, "Pago " + numero++, linea);
+                }
+            }
+            else
+            {
+                string pago = v.MetodoPago;
+                if (!string.IsNullOrEmpty(v.ReferenciaPago)) pago += "  (ref. " + v.ReferenciaPago + ")";
+                Dato(s, "Método de pago", pago);
+            }
             s.AddParagraph().Format.SpaceAfter = 4;
 
             var t = CrearTabla(s,
@@ -94,6 +108,10 @@ namespace Belisa
             if (v.MetodoPago == "Efectivo")
             {
                 lineas.Add(new[] { "Pagó con", v.MontoPago.ToString("C2") });
+                lineas.Add(new[] { "Cambio", v.MontoCambio.ToString("C2") });
+            }
+            else if (v.MontoCambio > 0)   // pago mixto con una parte en efectivo
+            {
                 lineas.Add(new[] { "Cambio", v.MontoCambio.ToString("C2") });
             }
             // El total va al final de la lista: es la línea que se resalta

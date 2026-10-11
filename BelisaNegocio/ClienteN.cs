@@ -28,6 +28,18 @@ namespace BelisaNegocio
             if (c.NombreCompleto.Length > 100) { mensaje = "El nombre no puede pasar de 100 caracteres."; return false; }
             if (!Validaciones.DatosContacto(c.Documento, c.Correo, c.Telefono, out mensaje)) return false;
 
+            // El cumpleaños es opcional, pero el día y el mes van juntos y la fecha debe existir
+            if (c.CumpleDia.HasValue != c.CumpleMes.HasValue)
+            {
+                mensaje = "Para guardar el cumpleaños elige el día y el mes.";
+                return false;
+            }
+            if (!CumpleanosN.EsValido(c.CumpleDia, c.CumpleMes))
+            {
+                mensaje = "La fecha de cumpleaños no es válida (por ejemplo, el 31 de febrero no existe).";
+                return false;
+            }
+
             int id = objD.Guardar(c, out mensaje);
             if (id > 0) c.IdCliente = id;
             return id > 0;

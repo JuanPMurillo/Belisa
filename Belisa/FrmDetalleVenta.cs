@@ -261,6 +261,7 @@ namespace Belisa
             try
             {
                 detalle = negocio.ObtenerDetalle(v.IdVenta);
+                v.Pagos = negocio.ObtenerPagos(v.IdVenta);   // una forma de pago, o dos si fue mixta
             }
             catch (Exception ex)
             {
@@ -285,8 +286,7 @@ namespace Belisa
             }
             else
             {
-                string titulo = "Detalle de " + v.NumeroDocumento + "  ·  " + v.ClienteNombre + "  ·  " + v.MetodoPago;
-                if (!string.IsNullOrEmpty(v.ReferenciaPago)) titulo += " (ref. " + v.ReferenciaPago + ")";
+                string titulo = "Detalle de " + v.NumeroDocumento + "  ·  " + v.ClienteNombre + "  ·  " + TextoPago(v);
                 if (v.MontoDescuento > 0)
                     titulo += "  ·  Descuento " + v.DescuentoPorcentaje.ToString("0.##") + "% (-" + v.MontoDescuento.ToString("C2") + ")";
                 lblTituloDetalle.Text = titulo;
@@ -299,7 +299,18 @@ namespace Belisa
         }
 
         // ---------- Acciones ----------
+        // «Efectivo», «Tarjeta (ref. 123)» o, si fue mixto, «Transferencia $100.00 + Efectivo $250.00»
+        private static string TextoPago(Venta v)
+        {
+            if (v.Pagos != null && v.Pagos.Count > 1)
+                return string.Join(" + ", v.Pagos.Select(p =>
+                    p.MetodoPago + " " + p.Monto.ToString("C2")
+                    + (string.IsNullOrEmpty(p.ReferenciaPago) ? "" : " (ref. " + p.ReferenciaPago + ")")));
 
+            string texto = v.MetodoPago;
+            if (!string.IsNullOrEmpty(v.ReferenciaPago)) texto += " (ref. " + v.ReferenciaPago + ")";
+            return texto;
+        }
         private void Comprobante()
         {
             if (ventaActual == null) return;

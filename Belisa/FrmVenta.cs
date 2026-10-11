@@ -14,6 +14,7 @@ namespace Belisa
     public class FrmVenta : Form
     {
         private const int CantidadMaxima = 100000;
+        private const string OpcionMixto = "Mixto (2 métodos)";
         private static readonly Color Verde = Color.FromArgb(39, 130, 80);
 
         private readonly VentaN negocio = new VentaN();
@@ -22,11 +23,19 @@ namespace Belisa
         private readonly List<DetalleVenta> carrito = new List<DetalleVenta>();
         private decimal totalActual;
 
+        // Pago mixto: lo que se configuró en la ventanita y para qué total se hizo
+        private List<PagoVenta> pagosMixtos;
+        private decimal efectivoMixto;
+        private decimal totalMixto;
+        private bool cambiandoMetodo;
+
         private BuscadorProducto buscador;
         private NumericUpDown numCantidad, numDescuento;
         private ComboBox cmbCliente, cmbMetodo;
         private TextBox txtReferencia, txtPago;
         private Label lblInfo, lblMensaje, lblSubtotal, lblDescuento, lblTotal, lblCambioTitulo, lblCambio;
+        private Label lblCumple, lblReferencia, lblResumenMixto;
+        private LinkLabel lnkMixto;
         private DataGridView grid;
         private Button btnAgregar, btnExacto, btnCobrar, btnLimpiar;
 
@@ -148,6 +157,17 @@ namespace Belisa
                 ValueMember = "IdCliente"
             };
 
+            // Aviso de cumpleaños, en la misma fila que la etiqueta «Cliente»
+            lblCumple = new Label
+            {
+                Location = new Point(110, 54),
+                Size = new Size(242, 18),
+                TextAlign = ContentAlignment.MiddleRight,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Estilo.Acento,
+                AutoEllipsis = true
+            };
+
             cmbMetodo = new ComboBox
             {
                 Location = new Point(28, 134),
@@ -156,10 +176,36 @@ namespace Belisa
                 Font = Estilo.Normal
             };
             cmbMetodo.Items.AddRange(VentaN.MetodosPago);
+            cmbMetodo.Items.Add(OpcionMixto);
             cmbMetodo.SelectedIndex = 0;
 
+            // Enlace para abrir o editar el pago mixto, en la misma fila que «Método de pago»
+            lnkMixto = new LinkLabel
+            {
+                Text = "Configurar pago mixto",
+                Location = new Point(172, 114),
+                Size = new Size(180, 18),
+                TextAlign = ContentAlignment.MiddleRight,
+                Font = new Font("Segoe UI", 9f),
+                LinkColor = Estilo.Acento,
+                ActiveLinkColor = Estilo.AcentoOscuro,
+                LinkBehavior = LinkBehavior.HoverUnderline,
+                Visible = false
+            };
+
+            lblReferencia = Estilo.Etiqueta("Referencia de pago (opcional)", 28, 172);
             txtReferencia = Estilo.Campo(28, 194, 324);
             txtReferencia.MaxLength = 50;
+
+            // Con pago mixto, este resumen ocupa el lugar de la referencia
+            lblResumenMixto = new Label
+            {
+                Location = new Point(28, 172),
+                Size = new Size(324, 44),
+                Font = Estilo.Normal,
+                ForeColor = Estilo.Texto,
+                Visible = false
+            };
 
             numDescuento = Num(28, 254, 110, 2, 100);
 
@@ -196,9 +242,9 @@ namespace Belisa
             panel.Controls.AddRange(new Control[]
             {
                 titulo, btnConfigTicket,
-                Estilo.Etiqueta("Cliente", 28, 52), cmbCliente,
-                Estilo.Etiqueta("Método de pago", 28, 112), cmbMetodo,
-                Estilo.Etiqueta("Referencia de pago (opcional)", 28, 172), txtReferencia,
+                Estilo.Etiqueta("Cliente", 28, 52), lblCumple, cmbCliente,
+                Estilo.Etiqueta("Método de pago", 28, 112), lnkMixto, cmbMetodo,
+                lblReferencia, txtReferencia, lblResumenMixto,
                 Estilo.Etiqueta("Descuento (%)", 28, 232), numDescuento,
                 Estilo.Etiqueta("Subtotal", 28, 298), lblSubtotal,
                 Estilo.Etiqueta("Descuento", 28, 322), lblDescuento,
@@ -212,8 +258,10 @@ namespace Belisa
             Controls.Add(panel);
 
             // Los eventos se conectan al final, cuando ya existen todos los controles
+            cmbCliente.SelectedIndexChanged += (s, e) => ClienteElegido();
             numDescuento.ValueChanged += (s, e) => Recalcular();
-            cmbMetodo.SelectedIndexChanged += (s, e) => Recalcular();
+            cmbMetodo.SelectedIndexChanged += (s, e) => MetodoCambiado();
+            lnkMixto.LinkClicked += (s, e) => { if (AbrirPagoMixto()) Recalcular(); };
             txtPago.KeyUp += (s, e) => Recalcular();
             txtPago.KeyDown += (s, e) =>
             {
@@ -311,6 +359,20 @@ namespace Belisa
         {
             lblMensaje.ForeColor = Estilo.Error;
             lblMensaje.Text = texto;
+        }
+
+        // Si la clienta cumple años hoy o este mes, se avisa para no dejar pasar la promoción
+        private void ClienteElegido()
+        {
+            lblCumple.Text = "";
+
+            var c = cmbCliente.SelectedItem as Cliente;
+            if (c == null || c.IdCliente <= 0) return;
+
+            if (CumpleanosN.EsHoy(c.CumpleDia, c.CumpleMes))
+                lblCumple.Text = "¡Hoy es su cumpleaños!";
+            else if (CumpleanosN.EsEsteMes(c.CumpleMes))
+                lblCumple.Text = "Cumple este mes: " + CumpleanosN.Texto(c.CumpleDia, c.CumpleMes);
         }
 
         // ---------- Carrito ----------
@@ -417,12 +479,96 @@ namespace Belisa
             Recalcular();
         }
 
-        // ---------- Totales ----------
+        // ---------- Método de pago ----------
 
         private bool EsEfectivo()
         {
             return Convert.ToString(cmbMetodo.SelectedItem) == "Efectivo";
         }
+
+        private bool EsMixto()
+        {
+            return Convert.ToString(cmbMetodo.SelectedItem) == OpcionMixto;
+        }
+
+        // Al elegir «Mixto» se abre la ventanita; si se cancela, se regresa a Efectivo
+        private void MetodoCambiado()
+        {
+            if (cambiandoMetodo) return;
+
+            if (EsMixto())
+            {
+                if (!AbrirPagoMixto())
+                {
+                    cambiandoMetodo = true;
+                    cmbMetodo.SelectedIndex = 0;
+                    cambiandoMetodo = false;
+                }
+            }
+            else
+            {
+                pagosMixtos = null;
+            }
+            Recalcular();
+        }
+
+        // Devuelve true si se aceptó la configuración; si se cancela, lo anterior se queda como estaba
+        private bool AbrirPagoMixto()
+        {
+            if (totalActual < 0.02m)
+            {
+                Aviso("Agrega productos o servicios antes de configurar un pago mixto.");
+                return false;
+            }
+
+            var previos = (pagosMixtos != null && totalMixto == totalActual) ? pagosMixtos : null;
+            using (var f = new FrmPagoMixto(totalActual, previos, efectivoMixto))
+            {
+                if (f.ShowDialog(this) != DialogResult.OK) return false;
+
+                pagosMixtos = f.Pagos;
+                efectivoMixto = f.EfectivoRecibido;
+                totalMixto = totalActual;
+                return true;
+            }
+        }
+
+        // Resumen del pago mixto en el panel de cobro
+        private void MostrarMixto()
+        {
+            txtReferencia.Enabled = false;
+            txtPago.Enabled = false;
+            btnExacto.Enabled = false;
+
+            if (pagosMixtos == null)
+            {
+                lblResumenMixto.ForeColor = Estilo.Error;
+                lblResumenMixto.Text = "Pago mixto sin configurar.";
+                lnkMixto.Text = "Configurar pago mixto";
+                txtPago.Clear();
+                lblCambioTitulo.Text = "Cambio";
+                lblCambio.ForeColor = Estilo.Texto;
+                lblCambio.Text = 0m.ToString("C2");
+                return;
+            }
+
+            lblResumenMixto.ForeColor = Estilo.Texto;
+            lblResumenMixto.Text = string.Join("\n", pagosMixtos.Select(p =>
+                p.MetodoPago + "  " + p.Monto.ToString("C2")
+                + (string.IsNullOrEmpty(p.ReferenciaPago) ? "" : "  (ref. " + p.ReferenciaPago + ")")));
+            lnkMixto.Text = "Editar pago mixto";
+
+            decimal efectivoParte = pagosMixtos.Where(p => p.MetodoPago == "Efectivo").Sum(p => p.Monto);
+            if (efectivoParte > 0) txtPago.Text = efectivoMixto.ToString("0.00", CultureInfo.CurrentCulture);
+            else txtPago.Clear();
+
+            decimal cambio = efectivoParte > 0 ? efectivoMixto - efectivoParte : 0m;
+            lblCambioTitulo.Text = "Cambio";
+            lblCambio.ForeColor = cambio > 0 ? Verde : Estilo.Texto;
+            lblCambio.Text = cambio.ToString("C2");
+        }
+
+        // ---------- Totales ----------
 
         // Lo que el cliente paga, leyendo lo que está escrito (sin esperar a que se salga del campo)
         private decimal Pago()
@@ -442,6 +588,22 @@ namespace Belisa
             lblSubtotal.Text = subtotal.ToString("C2");
             lblDescuento.Text = descuento > 0 ? "-" + descuento.ToString("C2") : descuento.ToString("C2");
             lblTotal.Text = totalActual.ToString("C2");
+
+            bool mixto = EsMixto();
+
+            // Si el total cambió después de configurar el pago mixto, hay que configurarlo de nuevo
+            if (mixto && pagosMixtos != null && totalMixto != totalActual) pagosMixtos = null;
+
+            lblReferencia.Visible = !mixto;
+            txtReferencia.Visible = !mixto;
+            lblResumenMixto.Visible = mixto;
+            lnkMixto.Visible = mixto;
+
+            if (mixto)
+            {
+                MostrarMixto();
+                return;
+            }
 
             bool efectivo = EsEfectivo();
             txtPago.Enabled = efectivo;
@@ -490,15 +652,26 @@ namespace Belisa
 
             Recalcular();   // toma el descuento tal como quedó escrito
 
+            bool mixto = EsMixto();
+            if (mixto && pagosMixtos == null)
+            {
+                // Falta configurarlo (o el total cambió): se abre la ventanita antes de cobrar
+                if (!AbrirPagoMixto())
+                {
+                    Aviso("Configura el pago mixto para poder cobrar.");
+                    return;
+                }
+                Recalcular();
+            }
+
             int idCliente = cmbCliente.SelectedValue == null ? 0 : (int)cmbCliente.SelectedValue;
+            string metodo = Convert.ToString(cmbMetodo.SelectedItem);
 
             var venta = new Venta
             {
                 IdCliente = idCliente > 0 ? (int?)idCliente : null,
-                MetodoPago = Convert.ToString(cmbMetodo.SelectedItem),
-                ReferenciaPago = txtReferencia.Text,
+                MetodoPago = mixto ? VentaN.MetodoMixto : metodo,
                 DescuentoPorcentaje = numDescuento.Value,
-                MontoPago = Pago(),
                 Detalle = carrito.Select(d => new DetalleVenta
                 {
                     IdProducto = d.IdProducto,
@@ -506,6 +679,25 @@ namespace Belisa
                     Cantidad = d.Cantidad
                 }).ToList()
             };
+
+            if (mixto)
+            {
+                venta.Pagos = pagosMixtos.Select(p => new PagoVenta
+                {
+                    MetodoPago = p.MetodoPago,
+                    Monto = p.Monto,
+                    ReferenciaPago = p.ReferenciaPago
+                }).ToList();
+                venta.MontoPago = efectivoMixto;
+            }
+            else
+            {
+                venta.Pagos = new List<PagoVenta>
+                {
+                    new PagoVenta { MetodoPago = metodo, Monto = totalActual, ReferenciaPago = txtReferencia.Text }
+                };
+                venta.MontoPago = Pago();
+            }
 
             btnCobrar.Enabled = false;   // evita doble clic
             try
@@ -520,7 +712,9 @@ namespace Belisa
 
                 string resumen = "Venta " + venta.NumeroDocumento + " registrada.\n\n"
                                + "Total: " + venta.MontoTotal.ToString("C2");
-                if (venta.MetodoPago == "Efectivo")
+                if (mixto)
+                    resumen += "\n" + string.Join(" + ", venta.Pagos.Select(p => p.MetodoPago + " " + p.Monto.ToString("C2")));
+                if (venta.MontoCambio > 0 || venta.MetodoPago == "Efectivo")
                     resumen += "\nCambio: " + venta.MontoCambio.ToString("C2");
 
                 // Ticket: según la configuración, se pregunta, se imprime solo o no se imprime
@@ -560,6 +754,7 @@ namespace Belisa
                 if (venta == null)
                     throw new InvalidOperationException("No se encontró la venta registrada.");
 
+                venta.Pagos = negocio.ObtenerPagos(idVenta);
                 Ticket.Imprimir(venta, negocio.ObtenerDetalle(idVenta));
             }
             catch (Exception ex)
@@ -573,6 +768,8 @@ namespace Belisa
         private void Reiniciar()
         {
             carrito.Clear();
+            pagosMixtos = null;
+            efectivoMixto = 0m;
             buscador.Clear();
             numCantidad.Value = 1;
             numDescuento.Value = 0;

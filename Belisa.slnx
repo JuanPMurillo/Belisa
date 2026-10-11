@@ -2,6 +2,8 @@
   <Project Path="Belisa/Belisa.csproj" Id="d7ba8002-5f19-4410-8c14-2c6c41412f6d" />
   <Project Path="BelisaDatos/BelisaDatos.csproj" Id="03ef80c8-da71-4814-81be-d8923719afc2" />
   <Project Path="BelisaEntidad/BelisaEntidad.csproj" Id="446883f1-5918-4cf4-aa4d-6dc4ebd310a5" />
-  <Project Path="BelisaInstalador/BelisaInstalador.vdproj" Type="Installer" />
+  <Project Path="BelisaInstalador/BelisaInstalador.vdproj" Type="Installer">
+    <Build />
+  </Project>
   <Project Path="BelisaNegocio/BelisaNegocio.csproj" Id="396f708c-ff80-45c0-831b-26d7b57a53d3" />
 </Solution>

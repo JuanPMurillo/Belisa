@@ -54,6 +54,8 @@ namespace BelisaEntidad
         public string Correo { get; set; }
         public string Telefono { get; set; }
         public bool Estado { get; set; }
+        public int? CumpleDia { get; set; }   // cumpleaños (solo día y mes), opcional
+        public int? CumpleMes { get; set; }
     }
 
     public class Proveedor
@@ -120,6 +122,7 @@ namespace BelisaEntidad
         public string AnuladaPor { get; set; }
         public string MotivoAnulacion { get; set; }
         public List<DetalleVenta> Detalle { get; set; } = new List<DetalleVenta>();
+        public List<PagoVenta> Pagos { get; set; } = new List<PagoVenta>();
     }
 
     public class DetalleVenta
@@ -130,5 +133,13 @@ namespace BelisaEntidad
         public decimal PrecioVenta { get; set; }
         public int Cantidad { get; set; }
         public decimal SubTotal { get; set; }
+    }
+    // Una forma de pago de una venta: una venta normal tiene una; una venta mixta tiene dos
+    public class PagoVenta
+    {
+        public int IdVenta { get; set; }
+        public string MetodoPago { get; set; }       // Efectivo, Tarjeta o Transferencia
+        public decimal Monto { get; set; }           // lo que se cubrió con este método
+        public string ReferenciaPago { get; set; }   // folio, clave de rastreo...
     }
 }

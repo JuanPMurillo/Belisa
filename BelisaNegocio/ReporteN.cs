@@ -71,12 +71,13 @@ namespace BelisaNegocio
             r.InventarioCosto = activos.Sum(p => p.Stock * p.PrecioCompra);
             r.InventarioVenta = activos.Sum(p => p.Stock * p.PrecioVenta);
 
-            // Siempre salen los tres métodos, aunque alguno no tenga ventas
+            // Cobros por método: una venta mixta aporta dos partes. Siempre salen los tres métodos
+            var pagos = ventaD.ListarPagos(desde, hasta);   // solo de ventas vigentes (no anuladas)
             r.PorMetodo = VentaN.MetodosPago.Select(m => new LineaReporte
             {
                 Etiqueta = m,
-                Cantidad = ventas.Count(v => v.MetodoPago == m),
-                Total = ventas.Where(v => v.MetodoPago == m).Sum(v => v.MontoTotal)
+                Cantidad = pagos.Count(p => p.MetodoPago == m),
+                Total = pagos.Where(p => p.MetodoPago == m).Sum(p => p.Monto)
             }).ToList();
 
             r.PorVendedor = ventas.GroupBy(v => v.UsuarioNombre).Select(g => new LineaReporte
