@@ -29,6 +29,7 @@ namespace Belisa
                 return _icono;
             }
         }
+        public static float EscalaFactor = 1.0f;
         public static readonly Font Normal = new Font("Segoe UI", 10.5f);
         public static readonly Font Negrita = new Font("Segoe UI", 10.5f, FontStyle.Bold);
         public static readonly Font Titulo = new Font("Segoe UI", 22f, FontStyle.Bold);
@@ -101,12 +102,39 @@ namespace Belisa
 
         public static void ConfigurarVentana(Form f, int ancho, int alto, string titulo)
         {
+            // Configuración base
             f.Text = titulo;
+            // Evitar escalado automático por DPI del framework para controlar nosotros la escala
+            f.AutoScaleMode = AutoScaleMode.None;
+            // Inicialmente usar el tamaño objetivo sin escala
             f.ClientSize = new Size(ancho, alto);
+
+            // Calcula factor de escala según el área de trabajo de la pantalla
+            var area = Screen.PrimaryScreen.WorkingArea;
+            double factorW = area.Width / (double)ancho;
+            double factorH = area.Height / (double)alto;
+            double factor = System.Math.Min(System.Math.Min(factorW, factorH), 1.0);
+            EscalaFactor = (float)factor;
+
+            if (EscalaFactor < 1f)
+            {
+                // Escalar controles existentes y reducir el tamaño del cliente
+                f.Scale(new SizeF(EscalaFactor, EscalaFactor));
+                f.ClientSize = new Size((int)(ancho * EscalaFactor), (int)(alto * EscalaFactor));
+                f.AutoScroll = true; // permitir scroll si algo queda fuera
+                f.FormBorderStyle = FormBorderStyle.Sizable;
+                f.MaximizeBox = true;
+                f.MinimizeBox = true;
+            }
+            else
+            {
+                f.ClientSize = new Size(ancho, alto);
+                f.FormBorderStyle = FormBorderStyle.FixedDialog;
+                f.MaximizeBox = false;
+                f.MinimizeBox = false;
+            }
+
             f.StartPosition = FormStartPosition.CenterScreen;
-            f.FormBorderStyle = FormBorderStyle.FixedDialog;
-            f.MaximizeBox = false;
-            f.MinimizeBox = false;
             f.BackColor = Fondo;
             f.Icon = IconoApp;
         }

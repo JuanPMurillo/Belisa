@@ -156,12 +156,8 @@
     <Compile Include="FrmDetalleVenta.cs" />
     <Compile Include="FrmMotivo.cs" />
     <Compile Include="FrmPagoMixto.cs" />
-    <Compile Include="FrmPendiente.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmPrimerAdmin.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="FrmPendiente.cs" />
+    <Compile Include="FrmPrimerAdmin.cs" />
     <Compile Include="FrmProducto.cs" />
     <Compile Include="FrmProveedor.cs" />
     <Compile Include="FrmReportes.cs" />

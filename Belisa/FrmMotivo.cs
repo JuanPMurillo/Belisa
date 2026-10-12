@@ -15,6 +15,13 @@ namespace Belisa
 
         public FrmMotivo(string titulo, string resumen)
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             Estilo.ConfigurarVentana(this, 480, 340, titulo);
             BackColor = Color.White;
 

@@ -24,12 +24,12 @@ namespace Belisa
     [DesignerCategory("Code")]   // evita que Visual Studio intente abrirla en el diseñador
     public abstract class FrmContactoBase : Form
     {
-        private readonly string singular;          // "cliente"
+        private readonly string singular;              // "cliente"
         private readonly string etiquetaNombre;    // "Nombre completo"
         private readonly bool conCumpleanos;       // solo los clientes guardan su cumpleaños
 
         private List<Contacto> contactos = new List<Contacto>();
-        private Contacto seleccion;                // null = se está creando uno nuevo
+        private Contacto seleccion;                 // null = se está creando uno nuevo
         private bool cargando;
 
         private DataGridView grid;
@@ -50,6 +50,13 @@ namespace Belisa
 
         protected FrmContactoBase(string singular, string etiquetaNombre, bool conCumpleanos)
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             this.singular = singular;
             this.etiquetaNombre = etiquetaNombre;
             this.conCumpleanos = conCumpleanos;
@@ -130,11 +137,15 @@ namespace Belisa
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
             };
+
+            var btnExcel = Exportar.BotonExcel(grid, singular == "cliente" ? "Clientes" : "Proveedores");
             barra.Controls.Add(lblResumen);
-            barra.Controls.Add(Exportar.BotonExcel(grid, singular == "cliente" ? "Clientes" : "Proveedores"));
+            barra.Controls.Add(btnExcel);
+
+            // Controles de búsqueda y filtros organizados de izquierda a derecha sin solaparse
             barra.Controls.Add(Estilo.Etiqueta("Buscar", 0, 16));
 
-            txtBuscar = Estilo.Campo(70, 12, 300);
+            txtBuscar = Estilo.Campo(52, 12, 160);
             txtBuscar.TextChanged += (s, e) => Refrescar();
             barra.Controls.Add(txtBuscar);
 
@@ -143,7 +154,7 @@ namespace Belisa
                 chkCumpleMes = new CheckBox
                 {
                     Text = "Cumpleaños este mes",
-                    Location = new Point(388, 15),
+                    Location = new Point(225, 15),
                     AutoSize = true,
                     Font = Estilo.Normal,
                     ForeColor = Estilo.Texto
@@ -381,7 +392,7 @@ namespace Belisa
             chkActivo.Checked = true;
             lblMensaje.Text = "";
 
-            cargando = true;               // evita que el evento de la tabla vuelva a cargar la fila
+            cargando = true;                // evita que el evento de la tabla vuelva a cargar la fila
             grid.CurrentCell = null;
             grid.ClearSelection();
             cargando = false;
@@ -397,7 +408,7 @@ namespace Belisa
             var c = new Contacto
             {
                 Id = esNuevo ? 0 : seleccion.Id,
-                Documento = "",            // el código lo asigna la base de datos
+                Documento = "",             // el código lo asigna la base de datos
                 Nombre = txtNombre.Text,
                 Telefono = txtTelefono.Text,
                 Correo = txtCorreo.Text,
@@ -424,7 +435,7 @@ namespace Belisa
 
                 lblMensaje.ForeColor = Color.FromArgb(39, 130, 80);
                 lblMensaje.Text = "Guardado correctamente."
-                                  + (esNuevo && guardado != null ? " Código asignado: " + guardado.Documento : "");
+                                + (esNuevo && guardado != null ? " Código asignado: " + guardado.Documento : "");
             }
             catch (Exception ex)
             {

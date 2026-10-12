@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using BelisaEntidad;
 using BelisaNegocio;
 
@@ -11,7 +13,15 @@ namespace Belisa
     {
         private readonly ProveedorN negocio = new ProveedorN();
 
-        public FrmProveedor() : base("proveedor", "Razón social") { }
+        public FrmProveedor() : base("proveedor", "Razón social")
+        {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+        }
 
         protected override List<Contacto> ListarContactos()
         {

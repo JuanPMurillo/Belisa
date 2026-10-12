@@ -24,9 +24,16 @@ namespace Belisa
 
         public FrmRespaldo()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
 
-            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
+            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
             ConstruirLista(contenido);        // el centro (Fill) primero...
             ConstruirAyuda(contenido);        // ...luego abajo...
             ConstruirEncabezado(contenido);   // ...y arriba

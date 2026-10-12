@@ -369,6 +369,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_61E169AA686B4AC7B333B42B7F331F75"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_61F0A25ED32961870CF9EF5412BD0E11"
         "OwnerKey" = "8:_C97398F674D6425899347B3E1605CB00"
         "MsmSig" = "8:_UNDEFINED"
@@ -783,14 +789,14 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_A5AA6E8849C64C359A8F4C399D897C1F"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_A7448415E69F05095AD37FB079F943FD"
+        "OwnerKey" = "8:_C97398F674D6425899347B3E1605CB00"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_A7448415E69F05095AD37FB079F943FD"
-        "OwnerKey" = "8:_C97398F674D6425899347B3E1605CB00"
+        "MsmKey" = "8:_A7D71FC52A83418F80DF8E6C92EC2368"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1095,6 +1101,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D3215E30509A4092830C8AAB9EA7A8B8"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D582601964C4AAA64986B3FBFFE8C689"
         "OwnerKey" = "8:_F0047A394D101EF599F6A4EDEF006980"
         "MsmSig" = "8:_UNDEFINED"
@@ -1149,12 +1161,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_D6A9EE6509044102885DFD2B1B0C47BF"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_D8A2A4D8C2CADDA55E10035A962F0857"
         "OwnerKey" = "8:_C97398F674D6425899347B3E1605CB00"
         "MsmSig" = "8:_UNDEFINED"
@@ -1187,6 +1193,12 @@
         {
         "MsmKey" = "8:_DD790DCD22A9D94FE0B07E78E7684D95"
         "OwnerKey" = "8:_C97398F674D6425899347B3E1605CB00"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DF25E8530D3E4C2CA83FA11B596A9ABE"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -3850,6 +3862,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_61E169AA686B4AC7B333B42B7F331F75"
+            {
+            "SourcePath" = "8:..\\Belisa\\BorrarDataBase.sql"
+            "TargetName" = "8:BorrarDataBase.sql"
+            "Tag" = "8:"
+            "Folder" = "8:_01AD4C1332354B1E994CA5DAAB859FC5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_61F0A25ED32961870CF9EF5412BD0E11"
             {
             "AssemblyRegister" = "3:1"
@@ -5059,26 +5091,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A5AA6E8849C64C359A8F4C399D897C1F"
-            {
-            "SourcePath" = "8:..\\Belisa\\Respaldo Belisa.sql"
-            "TargetName" = "8:Respaldo Belisa.sql"
-            "Tag" = "8:"
-            "Folder" = "8:_01AD4C1332354B1E994CA5DAAB859FC5"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A7448415E69F05095AD37FB079F943FD"
             {
             "AssemblyRegister" = "3:1"
@@ -5108,6 +5120,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A7D71FC52A83418F80DF8E6C92EC2368"
+            {
+            "SourcePath" = "8:..\\Belisa\\Respaldo Belisa.sql"
+            "TargetName" = "8:Respaldo Belisa.sql"
+            "Tag" = "8:"
+            "Folder" = "8:_01AD4C1332354B1E994CA5DAAB859FC5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A8A5952DECAF42D7292C254E4A1ABF65"
@@ -5978,6 +6010,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D3215E30509A4092830C8AAB9EA7A8B8"
+            {
+            "SourcePath" = "8:..\\Belisa\\CrearBaseBelisa2.sql"
+            "TargetName" = "8:CrearBaseBelisa2.sql"
+            "Tag" = "8:"
+            "Folder" = "8:_01AD4C1332354B1E994CA5DAAB859FC5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D582601964C4AAA64986B3FBFFE8C689"
             {
             "AssemblyRegister" = "3:1"
@@ -6038,26 +6090,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D6A9EE6509044102885DFD2B1B0C47BF"
-            {
-            "SourcePath" = "8:..\\Belisa\\CrearBaseBelisa.sql"
-            "TargetName" = "8:CrearBaseBelisa.sql"
-            "Tag" = "8:"
-            "Folder" = "8:_01AD4C1332354B1E994CA5DAAB859FC5"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D8A2A4D8C2CADDA55E10035A962F0857"
@@ -6244,6 +6276,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DF25E8530D3E4C2CA83FA11B596A9ABE"
+            {
+            "SourcePath" = "8:..\\Belisa\\CrearBaseBelisa.sql"
+            "TargetName" = "8:CrearBaseBelisa.sql"
+            "Tag" = "8:"
+            "Folder" = "8:_01AD4C1332354B1E994CA5DAAB859FC5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_E0413638AF464068F225C4445BFAC424"
@@ -6911,15 +6963,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Belisa Punto de Venta"
-        "ProductCode" = "8:{4D10481D-82F2-4975-A7E1-3FC0E9FEF0B3}"
-        "PackageCode" = "8:{4892BFE8-9549-4598-B157-15F700614386}"
+        "ProductCode" = "8:{DD122713-A000-4760-BFD1-CE33D94FB7CA}"
+        "PackageCode" = "8:{1DDC377E-8DE1-4F57-92F3-D625DDF37496}"
         "UpgradeCode" = "8:{196E2715-1A4A-4553-AEF6-6E39BB729AF6}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.1"
+        "ProductVersion" = "8:1.0.2"
         "Manufacturer" = "8:Delico Studio"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

@@ -30,9 +30,16 @@ namespace Belisa
 
         public FrmDetalleVenta()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
 
-            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
+            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
             ConstruirLista(contenido);     // el centro (Fill) primero...
             ConstruirDetalle(contenido);   // ...luego abajo...
             ConstruirBarra(contenido);     // ...y arriba
@@ -108,8 +115,8 @@ namespace Belisa
             panelBotones.Controls.Add(btnComprobante);
 
             var cabecera = new Panel { Dock = DockStyle.Top, Height = 38 };
-            cabecera.Controls.Add(lblTituloDetalle);   // Fill primero
-            cabecera.Controls.Add(panelBotones);       // luego los botones a la derecha
+            cabecera.Controls.Add(lblTituloDetalle);    // Fill primero
+            cabecera.Controls.Add(panelBotones);        // luego los botones a la derecha
 
             tarjeta.Controls.Add(gridDetalle);   // Fill primero
             tarjeta.Controls.Add(cabecera);      // luego arriba
@@ -124,44 +131,49 @@ namespace Belisa
             lblResumen = new Label
             {
                 Dock = DockStyle.Right,
-                Width = 430,
+                Width = 350,
                 TextAlign = ContentAlignment.MiddleRight,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
             };
+
+            var btnPdf = Exportar.BotonPdf(gridVentas, "Reporte de ventas", SubtituloReporte);
+            var btnExcel = Exportar.BotonExcel(gridVentas, "Ventas");
+
             barra.Controls.Add(lblResumen);
-            barra.Controls.Add(Exportar.BotonExcel(gridVentas, "Ventas"));
-            barra.Controls.Add(Exportar.BotonPdf(gridVentas, "Reporte de ventas", SubtituloReporte));
+            barra.Controls.Add(btnExcel);
+            barra.Controls.Add(btnPdf);
 
             dtDesde = new DateTimePicker
             {
-                Location = new Point(55, 12),
-                Width = 120,
+                Location = new Point(52, 12),
+                Width = 98,
                 Format = DateTimePickerFormat.Short,
                 Font = Estilo.Normal,
                 Value = DateTime.Today.AddDays(-30)
             };
             dtHasta = new DateTimePicker
             {
-                Location = new Point(235, 12),
-                Width = 120,
+                Location = new Point(202, 12),
+                Width = 98,
                 Format = DateTimePickerFormat.Short,
                 Font = Estilo.Normal,
                 Value = DateTime.Today
             };
 
-            var btnBuscar = Estilo.Boton("Buscar", 370, 10, 90, 32, true);
+            var btnBuscar = Estilo.Boton("Buscar", 306, 10, 70, 32, true);
             btnBuscar.Click += (s, e) => Buscar();
 
-            txtFiltro = Estilo.Campo(530, 12, 130);
+            var lblFiltrar = Estilo.Etiqueta("Filtrar", 384, 16);
+            txtFiltro = Estilo.Campo(432, 12, 80); // Con esto la etiqueta "Filtrar" y el cuadro de texto tendrán un espacio perfecto y separado
             txtFiltro.TextChanged += (s, e) => Refrescar();
 
             barra.Controls.AddRange(new Control[]
             {
-                Estilo.Etiqueta("Desde", 0, 16), dtDesde,
-                Estilo.Etiqueta("Hasta", 185, 16), dtHasta,
-                btnBuscar,
-                Estilo.Etiqueta("Filtrar", 475, 16), txtFiltro
+        Estilo.Etiqueta("Desde", 0, 16), dtDesde,
+        Estilo.Etiqueta("Hasta", 156, 16), dtHasta,
+        btnBuscar,
+        lblFiltrar, txtFiltro
             });
 
             padre.Controls.Add(barra);
@@ -176,7 +188,6 @@ namespace Belisa
 
         private void Cargar(DateTime desde, DateTime hasta)
         {
-            // Se recuerda el rango realmente buscado para ponerlo en el reporte
             desdeUsado = desde;
             hastaUsado = hasta;
 
@@ -217,23 +228,21 @@ namespace Belisa
                 || (v.ReferenciaPago ?? "").ToLower().Contains(filtro)
                 || (v.Anulada ? "anulada" : "vigente").Contains(filtro)).ToList();
 
-            // Las anuladas se ven en la lista pero no suman
             var vigentes = vista.Where(v => !v.Anulada).ToList();
             int anuladas = vista.Count - vigentes.Count;
 
             lblResumen.Text = vigentes.Count + " ventas  ·  " + vigentes.Sum(v => v.MontoTotal).ToString("C2")
-                              + (anuladas > 0 ? "  ·  " + anuladas + (anuladas == 1 ? " anulada" : " anuladas") : "")
-                              + (negocio.VeTodas ? "" : "  (tus ventas)");
+                            + (anuladas > 0 ? "  ·  " + anuladas + (anuladas == 1 ? " anulada" : " anuladas") : "")
+                            + (negocio.VeTodas ? "" : "  (tus ventas)");
 
             gridVentas.Rows.Clear();
             foreach (var v in vista)
             {
-                // En las anuladas el dinero se muestra en cero: así los totales de Excel y PDF salen bien
                 int i = gridVentas.Rows.Add(v.FechaRegistro.ToString("dd/MM/yyyy HH:mm"),
-                                            v.NumeroDocumento, v.ClienteNombre, v.MetodoPago,
-                                            v.Anulada ? 0m : v.MontoDescuento, v.UsuarioNombre,
-                                            v.Anulada ? "ANULADA" : "Vigente",
-                                            v.Anulada ? 0m : v.MontoTotal);
+                                           v.NumeroDocumento, v.ClienteNombre, v.MetodoPago,
+                                           v.Anulada ? 0m : v.MontoDescuento, v.UsuarioNombre,
+                                           v.Anulada ? "ANULADA" : "Vigente",
+                                           v.Anulada ? 0m : v.MontoTotal);
                 var fila = gridVentas.Rows[i];
                 fila.Tag = v;
 
@@ -261,7 +270,7 @@ namespace Belisa
             try
             {
                 detalle = negocio.ObtenerDetalle(v.IdVenta);
-                v.Pagos = negocio.ObtenerPagos(v.IdVenta);   // una forma de pago, o dos si fue mixta
+                v.Pagos = negocio.ObtenerPagos(v.IdVenta);
             }
             catch (Exception ex)
             {
@@ -272,7 +281,6 @@ namespace Belisa
             ventaActual = v;
             detalleActual = detalle;
 
-            // Una venta anulada ya no se puede volver a anular, reimprimir ni dar como comprobante
             bool vigente = !v.Anulada;
             btnComprobante.Enabled = vigente;
             btnTicket.Enabled = vigente;
@@ -281,8 +289,8 @@ namespace Belisa
             if (v.Anulada)
             {
                 lblTituloDetalle.Text = "ANULADA el " + (v.FechaAnulacion.HasValue ? v.FechaAnulacion.Value.ToString("dd/MM/yyyy HH:mm") : "")
-                                        + " por " + v.AnuladaPor + "  ·  Motivo: " + v.MotivoAnulacion
-                                        + "  ·  " + v.NumeroDocumento + " por " + v.MontoTotal.ToString("C2");
+                                      + " por " + v.AnuladaPor + "  ·  Motivo: " + v.MotivoAnulacion
+                                      + "  ·  " + v.NumeroDocumento + " por " + v.MontoTotal.ToString("C2");
             }
             else
             {
@@ -298,8 +306,6 @@ namespace Belisa
             gridDetalle.ClearSelection();
         }
 
-        // ---------- Acciones ----------
-        // «Efectivo», «Tarjeta (ref. 123)» o, si fue mixto, «Transferencia $100.00 + Efectivo $250.00»
         private static string TextoPago(Venta v)
         {
             if (v.Pagos != null && v.Pagos.Count > 1)
@@ -311,6 +317,7 @@ namespace Belisa
             if (!string.IsNullOrEmpty(v.ReferenciaPago)) texto += " (ref. " + v.ReferenciaPago + ")";
             return texto;
         }
+
         private void Comprobante()
         {
             if (ventaActual == null) return;
@@ -327,7 +334,7 @@ namespace Belisa
 
             try
             {
-                Ticket.Imprimir(ventaActual, detalleActual, true);   // true = sale marcado como reimpresión
+                Ticket.Imprimir(ventaActual, detalleActual, true);
             }
             catch (Exception ex)
             {
@@ -368,7 +375,7 @@ namespace Belisa
             if (!ok)
             {
                 MessageBox.Show(mensaje, "No se pudo anular", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                Cargar(desdeUsado, hastaUsado);   // por si alguien más ya la había anulado
+                Cargar(desdeUsado, hastaUsado);
                 return;
             }
 

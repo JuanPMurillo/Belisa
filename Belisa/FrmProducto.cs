@@ -33,6 +33,13 @@ namespace Belisa
 
         public FrmProducto()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
             ConstruirLista();        // primero el panel central (Fill)...
             ConstruirFormulario();   // ...y luego el lateral (Right)
@@ -43,7 +50,7 @@ namespace Belisa
 
         private void ConstruirLista()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
+            var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
 
             grid = new DataGridView
             {
@@ -99,23 +106,28 @@ namespace Belisa
             lblResumen = new Label
             {
                 Dock = DockStyle.Right,
-                Width = 300,
+                Width = 270,
                 TextAlign = ContentAlignment.MiddleRight,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
             };
+
+            var btnExcel = Exportar.BotonExcel(grid, "Productos y servicios");
             barra.Controls.Add(lblResumen);
-            barra.Controls.Add(Exportar.BotonExcel(grid, "Productos y servicios"));
+            barra.Controls.Add(btnExcel);
+
+            // Controles optimizados y compactos para 1366x768
+            // Controles organizados con espacio holgado
             barra.Controls.Add(Estilo.Etiqueta("Buscar", 0, 16));
 
-            txtBuscar = Estilo.Campo(70, 12, 280);
+            txtBuscar = Estilo.Campo(52, 12, 130);
             txtBuscar.TextChanged += (s, e) => Refrescar();
             barra.Controls.Add(txtBuscar);
 
             chkStockBajo = new CheckBox
             {
-                Text = "Solo stock bajo",
-                Location = new Point(368, 15),
+                Text = "Stock Bajo",
+                Location = new Point(192, 15),
                 AutoSize = true,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
@@ -291,16 +303,16 @@ namespace Belisa
                 && (!chkStockBajo.Checked || StockBajo(x))).ToList();
 
             lblResumen.Text = vista.Count + " de " + productos.Count + " registros  ·  "
-                              + productos.Count(StockBajo) + " con stock bajo";
+                            + productos.Count(StockBajo) + " con stock bajo";
 
             grid.Rows.Clear();
             foreach (var p in vista)
             {
                 int i = grid.Rows.Add(p.IdProducto, p.Codigo, p.Nombre, p.CategoriaDescripcion,
-                                      p.EsServicio ? "Servicio" : "Producto",
-                                      p.EsServicio ? (object)"—" : p.Stock,
-                                      p.PrecioCompra, p.PrecioVenta,
-                                      p.Estado ? "Activo" : "Inactivo");
+                                   p.EsServicio ? "Servicio" : "Producto",
+                                   p.EsServicio ? (object)"—" : p.Stock,
+                                   p.PrecioCompra, p.PrecioVenta,
+                                   p.Estado ? "Activo" : "Inactivo");
                 var fila = grid.Rows[i];
                 fila.Tag = p;
 
@@ -367,7 +379,7 @@ namespace Belisa
             seleccion = p;
 
             chkServicio.Checked = p.EsServicio;
-            chkServicio.Enabled = false;          // el tipo no se cambia después de crear
+            chkServicio.Enabled = false;        // el tipo no se cambia después de crear
             lblTitulo.Text = p.EsServicio ? "Editar servicio" : "Editar producto";
 
             txtNombre.Text = p.Nombre;
@@ -377,7 +389,7 @@ namespace Belisa
             numVenta.Value = p.PrecioVenta;
             lblStock.Text = "Stock actual";
             numStock.Value = Math.Min(p.Stock, Maximo);
-            numStock.Enabled = false;             // el stock no se edita a mano
+            numStock.Enabled = false;              // el stock no se edita a mano
             numStockMin.Value = Math.Min(p.StockMinimo, Maximo);
             txtDescripcion.Text = p.Descripcion;
             chkActivo.Checked = p.Estado;
@@ -406,7 +418,7 @@ namespace Belisa
             chkActivo.Checked = true;
             lblMensaje.Text = "";
 
-            cargando = true;               // evita que el evento de la tabla vuelva a cargar la fila
+            cargando = true;                    // evita que el evento de la tabla vuelva a cargar la fila
             grid.CurrentCell = null;
             grid.ClearSelection();
             cargando = false;
@@ -460,7 +472,7 @@ namespace Belisa
 
                 lblMensaje.ForeColor = Color.FromArgb(39, 130, 80);
                 lblMensaje.Text = "Guardado correctamente."
-                                  + (esNuevo && guardado != null ? " Código asignado: " + guardado.Codigo : "");
+                                + (esNuevo && guardado != null ? " Código asignado: " + guardado.Codigo : "");
             }
             catch (Exception ex)
             {

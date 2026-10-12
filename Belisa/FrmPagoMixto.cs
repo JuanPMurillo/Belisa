@@ -33,6 +33,13 @@ namespace Belisa
 
         public FrmPagoMixto(decimal total, List<PagoVenta> previos, decimal efectivoPrevio)
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             this.total = total;
             Estilo.ConfigurarVentana(this, 520, 590, "Pago mixto");
             StartPosition = FormStartPosition.CenterParent;

@@ -29,6 +29,13 @@ namespace Belisa
 
         public FrmUsuario()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
             ConstruirLista();        // primero el panel central (Fill)...
             ConstruirFormulario();   // ...y luego el lateral (Right)
@@ -39,7 +46,7 @@ namespace Belisa
 
         private void ConstruirLista()
         {
-            var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
+            var panel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
 
             grid = Tabla.Crear();
             grid.Columns.Add("Id", "Id");
@@ -66,11 +73,14 @@ namespace Belisa
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
             };
+
+            var btnExcel = Exportar.BotonExcel(grid, "Usuarios");
             barra.Controls.Add(lblResumen);
-            barra.Controls.Add(Exportar.BotonExcel(grid, "Usuarios"));
+            barra.Controls.Add(btnExcel);
+
             barra.Controls.Add(Estilo.Etiqueta("Buscar", 0, 16));
 
-            txtBuscar = Estilo.Campo(70, 12, 260);
+            txtBuscar = Estilo.Campo(52, 12, 180);
             txtBuscar.TextChanged += (s, e) => Refrescar();
             barra.Controls.Add(txtBuscar);
 
@@ -216,13 +226,13 @@ namespace Belisa
                 || (x.Correo ?? "").ToLower().Contains(filtro)).ToList();
 
             lblResumen.Text = vista.Count + " de " + usuarios.Count + " usuarios  ·  "
-                              + usuarios.Count(x => x.Estado) + " activos";
+                            + usuarios.Count(x => x.Estado) + " activos";
 
             grid.Rows.Clear();
             foreach (var u in vista)
             {
                 int i = grid.Rows.Add(u.IdUsuario, u.NameUser, u.NombreCompleto,
-                                      u.RolDescripcion, u.Correo, TextoEstado(u));
+                                   u.RolDescripcion, u.Correo, TextoEstado(u));
                 var fila = grid.Rows[i];
                 fila.Tag = u;
 
@@ -313,7 +323,7 @@ namespace Belisa
             btnDesbloquear.Visible = false;
             lblMensaje.Text = "";
 
-            cargando = true;               // evita que el evento de la tabla vuelva a cargar la fila
+            cargando = true;                // evita que el evento de la tabla vuelva a cargar la fila
             grid.CurrentCell = null;
             grid.ClearSelection();
             cargando = false;

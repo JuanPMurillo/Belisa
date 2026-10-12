@@ -32,9 +32,16 @@ namespace Belisa
 
         public FrmAjuste()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
 
-            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
+            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
             ConstruirTabla(contenido);        // el centro (Fill) primero...
             ConstruirBarra(contenido);        // ...luego la barra del historial...
             ConstruirFormulario(contenido);   // ...y arriba del todo el formulario
@@ -72,44 +79,49 @@ namespace Belisa
             lblResumen = new Label
             {
                 Dock = DockStyle.Right,
-                Width = 330,
+                Width = 270,
                 TextAlign = ContentAlignment.MiddleRight,
                 Font = Estilo.Normal,
                 ForeColor = Estilo.Texto
             };
+
+            var btnPdf = Exportar.BotonPdf(grid, "Reporte de ajustes de inventario", SubtituloReporte);
+            var btnExcel = Exportar.BotonExcel(grid, "Ajustes de inventario");
+
             barra.Controls.Add(lblResumen);
-            barra.Controls.Add(Exportar.BotonExcel(grid, "Ajustes de inventario"));
-            barra.Controls.Add(Exportar.BotonPdf(grid, "Reporte de ajustes de inventario", SubtituloReporte));
+            barra.Controls.Add(btnExcel);
+            barra.Controls.Add(btnPdf);
 
             dtDesde = new DateTimePicker
             {
-                Location = new Point(55, 12),
-                Width = 120,
+                Location = new Point(52, 12),
+                Width = 98,
                 Format = DateTimePickerFormat.Short,
                 Font = Estilo.Normal,
                 Value = DateTime.Today.AddDays(-30)
             };
             dtHasta = new DateTimePicker
             {
-                Location = new Point(235, 12),
-                Width = 120,
+                Location = new Point(202, 12),
+                Width = 98,
                 Format = DateTimePickerFormat.Short,
                 Font = Estilo.Normal,
                 Value = DateTime.Today
             };
 
-            var btnBuscar = Estilo.Boton("Buscar", 370, 10, 90, 32, true);
+            var btnBuscar = Estilo.Boton("Buscar", 306, 10, 70, 32, true);
             btnBuscar.Click += (s, e) => Buscar();
 
-            txtFiltro = Estilo.Campo(530, 12, 130);
+            var lblFiltrar = Estilo.Etiqueta("Filtrar", 384, 16);
+            txtFiltro = Estilo.Campo(432, 12, 100); // Con esto la etiqueta "Filtrar" y el cuadro de texto tendrán un espacio perfecto y separado
             txtFiltro.TextChanged += (s, e) => Refrescar();
 
             barra.Controls.AddRange(new Control[]
             {
-                Estilo.Etiqueta("Desde", 0, 16), dtDesde,
-                Estilo.Etiqueta("Hasta", 185, 16), dtHasta,
-                btnBuscar,
-                Estilo.Etiqueta("Filtrar", 475, 16), txtFiltro
+        Estilo.Etiqueta("Desde", 0, 16), dtDesde,
+        Estilo.Etiqueta("Hasta", 156, 16), dtHasta,
+        btnBuscar,
+        lblFiltrar, txtFiltro
             });
 
             padre.Controls.Add(barra);
@@ -246,9 +258,9 @@ namespace Belisa
             if (p == null) { lblInfo.Text = ""; return; }
 
             lblInfo.Text = "Stock en el sistema: " + p.Stock
-                         + "     ·     Mínimo: " + p.StockMinimo
-                         + "     ·     " + p.CategoriaDescripcion
-                         + (p.Estado ? "" : "     ·     PRODUCTO INACTIVO");
+                         + "    ·    Mínimo: " + p.StockMinimo
+                         + "    ·    " + p.CategoriaDescripcion
+                         + (p.Estado ? "" : "    ·    PRODUCTO INACTIVO");
         }
 
         private void Diferencia()
@@ -356,7 +368,6 @@ namespace Belisa
 
         private void Buscar()
         {
-            // Se recuerda el rango realmente buscado para ponerlo en el reporte
             desdeUsado = dtDesde.Value.Date;
             hastaUsado = dtHasta.Value.Date;
 
@@ -404,9 +415,9 @@ namespace Belisa
             foreach (var a in vista)
             {
                 int i = grid.Rows.Add(a.FechaRegistro.ToString("dd/MM/yyyy HH:mm"),
-                                      a.ProductoCodigo, a.ProductoNombre,
-                                      a.StockAnterior, a.StockNuevo, a.Diferencia,
-                                      a.Motivo, a.Nota, a.UsuarioNombre);
+                                     a.ProductoCodigo, a.ProductoNombre,
+                                     a.StockAnterior, a.StockNuevo, a.Diferencia,
+                                     a.Motivo, a.Nota, a.UsuarioNombre);
 
                 var celda = grid.Rows[i].Cells["Diferencia"];
                 celda.Style.Font = Estilo.Negrita;

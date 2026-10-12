@@ -18,9 +18,16 @@ namespace Belisa
 
         public FrmReportes()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
 
-            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
+            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
             ConstruirTablas(contenido);     // el centro (Fill) primero...
             ConstruirTarjetas(contenido);   // ...luego las tarjetas...
             ConstruirBarra(contenido);      // ...y arriba del todo la barra
@@ -219,8 +226,8 @@ namespace Belisa
                 Text = titulo
             };
 
-            panel.Controls.Add(grid);       // Fill primero
-            panel.Controls.Add(etiqueta);   // luego el título arriba
+            panel.Controls.Add(grid);        // Fill primero
+            panel.Controls.Add(etiqueta);    // luego el título arriba
             return panel;
         }
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using BelisaNegocio;
 
 namespace Belisa
 {
+    [DesignerCategory("Code")]
     public class FrmPrimerAdmin : Form
     {
         private readonly UsuarioN negocio = new UsuarioN();
@@ -14,6 +16,13 @@ namespace Belisa
 
         public FrmPrimerAdmin()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             Estilo.ConfigurarVentana(this, 400, 560, "Belisa - Configuración inicial");
 
             var titulo = new Label

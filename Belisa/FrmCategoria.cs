@@ -23,9 +23,19 @@ namespace Belisa
 
         public FrmCategoria()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
             BackColor = Estilo.Fondo;
-            ConstruirLista();        // primero el panel central (Fill)...
-            ConstruirFormulario();   // ...y luego el lateral (Right)
+
+            // 2. Asegurar el escalado correcto en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
+            // NOTA: Es crucial agregar primero el panel derecho y luego el de relleno (Fill)
+            ConstruirFormulario();   // Panel lateral derecho
+            ConstruirLista();        // Panel central de lista
+
             Load += (s, e) => { Cargar(); Nuevo(); };
         }
 

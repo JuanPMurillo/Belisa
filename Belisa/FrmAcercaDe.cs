@@ -13,6 +13,10 @@ namespace Belisa
 
         public FrmAcercaDe()
         {
+            // 1. Evitar parpadeos (Double buffering) al redimensionar o cargar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
             BackColor = Estilo.Fondo;
 
             tarjeta = new Panel { Size = new Size(520, 470), BackColor = Color.White };
@@ -36,6 +40,9 @@ namespace Belisa
                 410, 40, new Font("Segoe UI", 9f), Color.Gray));
 
             Controls.Add(tarjeta);
+
+            // 2. Asegurar el escalado correcto de fuentes en diferentes resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
 
             Resize += (s, e) => Centrar();
             Load += (s, e) => Centrar();

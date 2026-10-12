@@ -41,6 +41,13 @@ namespace Belisa
 
         public FrmVenta()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
             ConstruirCarrito();   // el centro (Fill) primero...
             ConstruirCobro();     // ...y luego el panel lateral (Right)
@@ -760,7 +767,7 @@ namespace Belisa
             catch (Exception ex)
             {
                 MessageBox.Show("La venta se guardó, pero no se pudo imprimir el ticket.\n\n" + ex.Message
-                                + "\n\nPuedes reimprimirlo en Ventas → Ver detalle.",
+                              + "\n\nPuedes reimprimirlo en Ventas → Ver detalle.",
                     "Ticket", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }

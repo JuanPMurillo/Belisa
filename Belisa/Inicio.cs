@@ -24,6 +24,13 @@ namespace Belisa
 
         public Inicio(Usuario usuario)
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             this.usuario = usuario;
 
             Text = "Belisa - Punto de venta";
@@ -58,6 +65,7 @@ namespace Belisa
 
             MostrarBienvenida();
         }
+
         // Una vez al día, al cerrar sesión, se guarda un respaldo de la base de datos
         private void RespaldoAutomatico()
         {
@@ -67,6 +75,7 @@ namespace Belisa
                 MessageBox.Show(mensaje, "Respaldo automático", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
         // ---------- Construcción de la pantalla ----------
 
         private void ConstruirContenedor()
@@ -170,7 +179,8 @@ namespace Belisa
                 FlowDirection = FlowDirection.TopDown,
                 WrapContents = false,
                 BackColor = Color.White,
-                Padding = new Padding(0, 8, 0, 0)
+                Padding = new Padding(0, 8, 0, 0),
+                AutoScroll = true
             };
 
             // ---- Opciones del menú (el nombre debe coincidir con la tabla PERMISO) ----
@@ -202,7 +212,8 @@ namespace Belisa
 
         private BotonMenu NuevoBoton(string texto, int sangria)
         {
-            return new BotonMenu(texto, sangria, AnchoMenu - 1);
+            // Ajustamos el ancho restando 16 píxeles para evitar que cause scroll horizontal al aparecer la barra vertical
+            return new BotonMenu(texto, sangria, AnchoMenu - 17);
         }
 
         // Opción simple (sin submenú)
@@ -217,27 +228,52 @@ namespace Belisa
         // Opción con submenú desplegable
         private void AgregarItem(string permiso, string texto, string[] subtextos, Func<Form>[] fabricas)
         {
-            var cabecera = NuevoBoton(texto + "  ▾", 0);
-            cabecera.Visible = permisos.Contains(permiso);
-            menu.Controls.Add(cabecera);
+            bool visible = permisos.Contains(permiso);
 
-            var subs = new List<BotonMenu>();
+            // Grupo que contiene la cabecera y el panel de subitems
+            var grupo = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoSize = true,
+                Width = AnchoMenu - 17
+            };
+
+            var cabecera = NuevoBoton(texto + "  ▾", 0);
+            cabecera.Visible = visible;
+            cabecera.Width = AnchoMenu - 17;
+            grupo.Controls.Add(cabecera);
+
+            var panelSubs = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoSize = true,
+                Visible = false,
+                Width = AnchoMenu - 20,
+                Padding = new Padding(0, 0, 0, 0)
+            };
+
             for (int i = 0; i < subtextos.Length; i++)
             {
                 int idx = i;
                 var sub = NuevoBoton(subtextos[i], 22);
-                sub.Visible = false;
                 sub.Click += (s, e) => Abrir(sub, fabricas[idx]());
-                menu.Controls.Add(sub);
-                subs.Add(sub);
+                sub.Width = AnchoMenu - 39;
+                panelSubs.Controls.Add(sub);
             }
+
+            grupo.Controls.Add(panelSubs);
+            menu.Controls.Add(grupo);
 
             bool abierto = false;
             cabecera.Click += (s, e) =>
             {
                 abierto = !abierto;
                 cabecera.Text = texto + (abierto ? "  ▴" : "  ▾");
-                foreach (var sub in subs) sub.Visible = abierto;
+                panelSubs.Visible = abierto;
+                // Asegurar visibilidad del grupo cuando se expande
+                if (abierto) menu.ScrollControlIntoView(grupo);
             };
         }
 
@@ -305,6 +341,10 @@ namespace Belisa
 
         public BotonMenu(string texto, int sangria, int ancho)
         {
+            // Evitar parpadeos y asegurar rendimiento visual fluido
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
             Text = texto;
             Size = new Size(ancho, 44);
             Margin = new Padding(0);

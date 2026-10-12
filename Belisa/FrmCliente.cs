@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using BelisaEntidad;
 using BelisaNegocio;
 
@@ -12,7 +14,15 @@ namespace Belisa
         private readonly ClienteN negocio = new ClienteN();
 
         // El tercer dato (true) activa el cumpleaños opcional: los proveedores no lo usan
-        public FrmCliente() : base("cliente", "Nombre completo", true) { }
+        public FrmCliente() : base("cliente", "Nombre completo", true)
+        {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+        }
 
         protected override List<Contacto> ListarContactos()
         {

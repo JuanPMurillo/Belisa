@@ -29,12 +29,19 @@ namespace Belisa
 
         public FrmCompra()
         {
+            // 1. Evitar parpadeos y asegurar rendimiento visual fluido al redimensionar
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            UpdateStyles();
+
+            // 2. Asegurar el escalado correcto de fuentes en distintas resoluciones
+            AutoScaleMode = AutoScaleMode.Font;
+
             BackColor = Estilo.Fondo;
 
-            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24) };
-            ConstruirTabla(contenido);        // el centro (Fill) primero...
-            ConstruirPie(contenido);          // ...luego abajo...
-            ConstruirEncabezado(contenido);   // ...y arriba
+            var contenido = new Panel { Dock = DockStyle.Fill, Padding = new Padding(24), AutoScroll = true };
+            ConstruirTabla(contenido);         // el centro (Fill) primero...
+            ConstruirPie(contenido);           // ...luego abajo...
+            ConstruirEncabezado(contenido);    // ...y arriba
             Controls.Add(contenido);
 
             Load += (s, e) => CargarDatos();
@@ -269,8 +276,8 @@ namespace Belisa
             numCompra.Value = p.PrecioCompra;
             numVenta.Value = p.PrecioVenta;
             lblInfo.Text = "Stock actual: " + p.Stock
-                         + "     ·     Compra actual: " + p.PrecioCompra.ToString("C2")
-                         + "     ·     Venta actual: " + p.PrecioVenta.ToString("C2");
+                         + "    ·    Compra actual: " + p.PrecioCompra.ToString("C2")
+                         + "    ·    Venta actual: " + p.PrecioVenta.ToString("C2");
         }
 
         private void Aviso(string texto)
@@ -324,7 +331,6 @@ namespace Belisa
             }
             else
             {
-                // Mismo producto otra vez: se suma la cantidad y quedan los precios más recientes
                 if (existente.Cantidad + cantidad > CantidadMaxima)
                 {
                     Aviso("La cantidad máxima por producto es " + CantidadMaxima.ToString("N0") + ".");
@@ -372,7 +378,7 @@ namespace Belisa
             lblMensaje.Text = "";
             cmbProveedor.SelectedIndex = -1;
             cmbTipo.SelectedIndex = 0;
-            cmbMetodo.SelectedIndex = 0;   // si estaba en tarjeta, esto también limpia la referencia
+            cmbMetodo.SelectedIndex = 0;
             txtReferencia.Clear();
         }
 
@@ -421,7 +427,7 @@ namespace Belisa
                 }).ToList()
             };
 
-            btnRegistrar.Enabled = false;   // evita doble clic
+            btnRegistrar.Enabled = false;
             try
             {
                 string mensaje;
@@ -434,7 +440,7 @@ namespace Belisa
                 MessageBox.Show("Compra " + compra.NumeroDocumento + " registrada.\nEl inventario ya está actualizado.",
                     "Listo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Reiniciar();
-                CargarDatos();   // trae el stock y los precios ya actualizados
+                CargarDatos();
             }
             catch (Exception ex)
             {
